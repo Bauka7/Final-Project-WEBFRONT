@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ReadOwl – My Library</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <div class="container">
+      <header class="topbar">
+        <div class="mobile-brand" aria-label="ReadOwl">
+          <div class="mobile-brand__logo" aria-hidden="true">
+            <img src="owl-svgrepo-com (1).svg" alt="" />
+          </div>
+          <div class="mobile-brand__name">ReadOwl</div>
+        </div>
+      </header>
+
+      <!-- SIDEBAR (desktop) / BOTTOM NAV (mobile via CSS) -->
+      <aside class="sidebar" aria-label="Primary navigation">
+        <div class="brand">
+          <div class="brand__logo" aria-hidden="true">
+            <img src="owl-svgrepo-com (1).svg" alt="ReadOwl icon" class="brand__owl">
+          </div>
+          <div class="brand__name">ReadOwl</div>
+        </div>
+
+        <nav class="menu">
+          <a class="menu__item is-active" href="#" aria-current="page">
+            <span class="menu__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"
+                      fill="none" stroke="currentColor" stroke-width="1.8"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="menu__text">Home</span>
+          </a>
+
+          <a class="menu__item" href="#">
+            <span class="menu__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 19a2 2 0 0 0 2 2h12"
+                      fill="none" stroke="currentColor" stroke-width="1.8"
+                      stroke-linecap="round"/>
+                <path d="M6 17V5a2 2 0 0 1 2-2h10v16H8a2 2 0 0 0-2 2z"
+                      fill="none" stroke="currentColor" stroke-width="1.8"
+                      stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="menu__text">My library</span>
+          </a>
+
+          <a class="menu__item" href="#">
+            <span class="menu__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M6 6h15l-2 9H7L6 6z"
+                      fill="none" stroke="currentColor" stroke-width="1.8"
+                      stroke-linejoin="round"/>
+                <path d="M6 6 5 3H2"
+                      fill="none" stroke="currentColor" stroke-width="1.8"
+                      stroke-linecap="round"/>
+                <path d="M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm8 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
+                      fill="none" stroke="currentColor" stroke-width="1.8"/>
+              </svg>
+            </span>
+            <span class="menu__text">Shop</span>
+          </a>
+
+          <a class="menu__item" href="#">
+            <span class="menu__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 5h16v14H4z"
+                      fill="none" stroke="currentColor" stroke-width="1.8"
+                      stroke-linejoin="round"/>
+                <path d="M7 9h10M7 12h10M7 15h7"
+                      fill="none" stroke="currentColor" stroke-width="1.8"
+                      stroke-linecap="round"/>
+              </svg>
+            </span>
+            <span class="menu__text">News</span>
+          </a>
+        </nav>
+
+        <!-- desktop continue/profile -->
+        <div class="sidebar__bottom">
+          <button class="continue" type="button">
+            <div class="continue__thumb" aria-hidden="true"></div>
+            <div class="continue__meta">
+              <div class="continue__title">Continue reading</div>
+            </div>
+          </button>
+
+          <div class="profile" role="button" tabindex="0" aria-label="Open profile">
+            <div class="profile__avatar" aria-hidden="true">S</div>
+            <div class="profile__name">Stephan</div>
+            <div class="profile__arrow" aria-hidden="true">›</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN -->
+      <main class="main">
+        <header class="topbar">
+          <div class="tabs" role="tablist" aria-label="Library tabs">
+            <button class="tab is-active" type="button" role="tab" aria-selected="true" data-tab="shelves">Shelves</button>
+            <button class="tab" type="button" role="tab" aria-selected="false" data-tab="all">All Books</button>
+          </div>
+
+          <div class="search">
+            <span class="search__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
+                      fill="none" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M16.5 16.5 21 21"
+                      fill="none" stroke="currentColor" stroke-width="1.8"
+                      stroke-linecap="round"/>
+              </svg>
+            </span>
+            <input id="searchInput" class="search__input" type="search" placeholder="Search in My library" />
+          </div>
+
+          <button class="mini-profile" type="button" aria-label="Open profile">
+            <span class="mini-profile__avatar" aria-hidden="true">S</span>
+          </button>
+        </header>
+
+        <!-- ✅ Continue reading visible on phones -->
+        <section class="mobile-continue" aria-label="Continue reading">
+          <button class="continue continue--compact" type="button">
+            <div class="continue__thumb" aria-hidden="true"></div>
+            <div class="continue__meta">
+              <div class="continue__title">Continue reading</div>
+            </div>
+          </button>
+        </section>
+
+        <!-- VIEW: SHELVES -->
+        <section class="view view--active" id="view-shelves" data-view="shelves">
+          <section class="shelves">
+            <section class="shelf" id="shelf-current" data-shelf="current">
+              <div class="shelf__head">
+                <h2 class="shelf__title">Currently reading</h2>
+              </div>
+              <div class="shelf__row">
+                <div class="books">
+                  <div class="book" data-id="b1" data-title="Atomic Habits" data-author="James Clear" title="Atomic Habits — James Clear"></div>
+                  <div class="book" data-id="b2" data-title="Dune" data-author="Frank Herbert" title="Dune — Frank Herbert"></div>
+                  <div class="book" data-id="b3" data-title="Clean Code" data-author="Robert C. Martin" title="Clean Code — Robert C. Martin"></div>
+                </div>
+                <div class="board"></div>
+              </div>
+            </section>
+
+            <section class="shelf" id="shelf-next" data-shelf="next">
+              <div class="shelf__head">
+                <h2 class="shelf__title">Next up</h2>
+                <a class="shelf__link" href="#" data-shelf="next">Full shelf →</a>
+              </div>
+              <div class="shelf__row">
+                <div class="books">
+                  <div class="book" data-id="b4" data-title="The Hobbit" data-author="J.R.R. Tolkien" title="The Hobbit — J.R.R. Tolkien">
+                    <img class="book__img" loading="lazy" alt="The Hobbit cover"
+                         src="https://covers.openlibrary.org/b/isbn/9780735211292-L.jpg">
+                  </div>
+                  <div class="book" data-id="b5" data-title="Sapiens" data-author="Yuval Noah Harari" title="Sapiens — Yuval Noah Harari">
+                    <img class="book__img" loading="lazy" alt="Sapiens cover"
+                         src="https://covers.openlibrary.org/b/isbn/9780441013593-L.jpg">
+                  </div>
+                  <div class="book" data-id="b6" data-title="1984" data-author="George Orwell" title="1984 — George Orwell">
+                    <img class="book__img" loading="lazy" alt="1984 cover"
+                         src="https://covers.openlibrary.org/b/isbn/9780132350884-L.jpg">
+                  </div>
+                  <div class="book" data-id="b7" data-title="The Alchemist" data-author="Paulo Coelho" title="The Alchemist — Paulo Coelho"></div>
+                  <div class="book" data-id="b8" data-title="The Pragmatic Programmer" data-author="Hunt & Thomas" title="The Pragmatic Programmer — Hunt & Thomas"></div>
+                  <div class="book" data-id="b9" data-title="Ikigai" data-author="Garcia & Miralles" title="Ikigai — Garcia & Miralles"></div>
+                </div>
+                <div class="board"></div>
+              </div>
+            </section>
+
+            <section class="shelf" id="shelf-finished" data-shelf="finished">
+              <div class="shelf__head">
+                <h2 class="shelf__title">Finished</h2>
+                <a class="shelf__link" href="#" data-shelf="finished">Full shelf →</a>
+              </div>
+              <div class="shelf__row">
+                <div class="books">
+                  <div class="book" data-id="b10" data-title="Harry Potter" data-author="J.K. Rowling" title="Harry Potter — J.K. Rowling"></div>
+                  <div class="book" data-id="b11" data-title="The Little Prince" data-author="Antoine de Saint-Exupéry" title="The Little Prince — Antoine de Saint-Exupéry"></div>
+                  <div class="book" data-id="b12" data-title="The Great Gatsby" data-author="F. Scott Fitzgerald" title="The Great Gatsby — F. Scott Fitzgerald"></div>
+                  <div class="book" data-id="b13" data-title="Rich Dad Poor Dad" data-author="Robert Kiyosaki" title="Rich Dad Poor Dad — Robert Kiyosaki"></div>
+                  <div class="book" data-id="b14" data-title="Deep Work" data-author="Cal Newport" title="Deep Work — Cal Newport"></div>
+                  <div class="book" data-id="b15" data-title="The Psychology of Money" data-author="Morgan Housel" title="The Psychology of Money — Morgan Housel"></div>
+                </div>
+                <div class="board"></div>
+              </div>
+            </section>
+          </section>
+        </section>
+
+        <!-- VIEW: ALL BOOKS -->
+        <section class="view" id="view-all" data-view="all" aria-label="All books grid">
+          <div class="all-header">
+            <div class="all-title">
+              <h2>All Books</h2>
+              <p class="all-sub">Tap a book to open details.</p>
+            </div>
+
+            <div class="filters">
+              <select id="sortSelect" class="select" aria-label="Sort books">
+                <option value="title-asc">Sort: Title (A → Z)</option>
+                <option value="title-desc">Sort: Title (Z → A)</option>
+                <option value="author-asc">Sort: Author (A → Z)</option>
+                <option value="author-desc">Sort: Author (Z → A)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="all-grid" id="allGrid"></div>
+
+          <div class="empty" id="emptyState" hidden>
+            <div class="empty__title">No results</div>
+            <div class="empty__text">Try another search.</div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="bookModal" aria-hidden="true">
+    <div class="modal__backdrop" data-close="1"></div>
+    <div class="modal__panel" role="dialog" aria-modal="true">
+      <button class="modal__close" data-close="1" aria-label="Close">✕</button>
+      <h3 class="modal__title" id="mTitle">Book</h3>
+      <p class="modal__meta" id="mMeta">Move this book to another shelf</p>
+      <div class="modal__row">
+        <select class="modal__select" id="mShelf">
+          <option value="current">Currently reading</option>
+          <option value="next">Next up</option>
+          <option value="finished">Finished</option>
+        </select>
+        <button class="modal__btn" id="mSave">Save</button>
+      </div>
+      <div class="toast" id="mToast">Saved!</div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
