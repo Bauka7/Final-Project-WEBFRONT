@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ReadOwl – My Library</title>
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <meta name="description" content="ReadOwl - Your personal digital library. Organize, discover, and enjoy your favorite books." />
 </head>
 <body>
   <div class="page">
@@ -18,7 +20,6 @@
         </div>
       </header>
 
-      <!-- SIDEBAR (desktop) / BOTTOM NAV (mobile via CSS) -->
       <aside class="sidebar" aria-label="Primary navigation">
         <div class="brand">
           <div class="brand__logo" aria-hidden="true">
@@ -28,7 +29,7 @@
         </div>
 
         <nav class="menu">
-          <a class="menu__item is-active" href="#" aria-current="page">
+          <a class="menu__item is-active" href="#" aria-current="page" data-page="home">
             <span class="menu__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
                 <path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"
@@ -39,7 +40,7 @@
             <span class="menu__text">Home</span>
           </a>
 
-          <a class="menu__item" href="#">
+          <a class="menu__item" href="#" data-page="library">
             <span class="menu__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
                 <path d="M4 19a2 2 0 0 0 2 2h12"
@@ -53,7 +54,7 @@
             <span class="menu__text">My library</span>
           </a>
 
-          <a class="menu__item" href="#">
+          <a class="menu__item" href="#" data-page="shop">
             <span class="menu__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
                 <path d="M6 6h15l-2 9H7L6 6z"
@@ -69,7 +70,7 @@
             <span class="menu__text">Shop</span>
           </a>
 
-          <a class="menu__item" href="#">
+          <a class="menu__item" href="#" data-page="news">
             <span class="menu__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
                 <path d="M4 5h16v14H4z"
@@ -84,7 +85,6 @@
           </a>
         </nav>
 
-        <!-- desktop continue/profile -->
         <div class="sidebar__bottom">
           <button class="continue" type="button">
             <div class="continue__thumb" aria-hidden="true"></div>
@@ -101,44 +101,12 @@
         </div>
       </aside>
 
-      <!-- MAIN -->
       <main class="main">
         <header class="topbar">
-          <div class="tabs" role="tablist" aria-label="Library tabs">
-            <button class="tab is-active" type="button" role="tab" aria-selected="true" data-tab="shelves">Shelves</button>
-            <button class="tab" type="button" role="tab" aria-selected="false" data-tab="all">All Books</button>
-          </div>
-
-          <div class="search">
-            <span class="search__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
-                      fill="none" stroke="currentColor" stroke-width="1.8"/>
-                <path d="M16.5 16.5 21 21"
-                      fill="none" stroke="currentColor" stroke-width="1.8"
-                      stroke-linecap="round"/>
-              </svg>
-            </span>
-            <input id="searchInput" class="search__input" type="search" placeholder="Search in My library" />
-          </div>
-
-          <button class="mini-profile" type="button" aria-label="Open profile">
-            <span class="mini-profile__avatar" aria-hidden="true">S</span>
-          </button>
+          <h1 class="library-title">My Library</h1>
         </header>
 
-        <!-- ✅ Continue reading visible on phones -->
-        <section class="mobile-continue" aria-label="Continue reading">
-          <button class="continue continue--compact" type="button">
-            <div class="continue__thumb" aria-hidden="true"></div>
-            <div class="continue__meta">
-              <div class="continue__title">Continue reading</div>
-            </div>
-          </button>
-        </section>
-
-        <!-- VIEW: SHELVES -->
-        <section class="view view--active" id="view-shelves" data-view="shelves">
+        <section class="view" id="view-shelves" data-view="shelves" style="display: none;">
           <section class="shelves">
             <section class="shelf" id="shelf-current" data-shelf="current">
               <div class="shelf__head">
@@ -146,54 +114,15 @@
               </div>
               <div class="shelf__row">
                 <div class="books">
-                  <div class="book" data-id="b1" data-title="Atomic Habits" data-author="James Clear" title="Atomic Habits — James Clear"></div>
-                  <div class="book" data-id="b2" data-title="Dune" data-author="Frank Herbert" title="Dune — Frank Herbert"></div>
-                  <div class="book" data-id="b3" data-title="Clean Code" data-author="Robert C. Martin" title="Clean Code — Robert C. Martin"></div>
-                </div>
-                <div class="board"></div>
-              </div>
-            </section>
-
-            <section class="shelf" id="shelf-next" data-shelf="next">
-              <div class="shelf__head">
-                <h2 class="shelf__title">Next up</h2>
-                <a class="shelf__link" href="#" data-shelf="next">Full shelf →</a>
-              </div>
-              <div class="shelf__row">
-                <div class="books">
-                  <div class="book" data-id="b4" data-title="The Hobbit" data-author="J.R.R. Tolkien" title="The Hobbit — J.R.R. Tolkien">
-                    <img class="book__img" loading="lazy" alt="The Hobbit cover"
-                         src="https://covers.openlibrary.org/b/isbn/9780735211292-L.jpg">
+                  <div class="book" data-id="b1" data-title="Atomic Habits" data-author="James Clear" title="Atomic Habits — James Clear">
+                    <img class="book__img" loading="lazy" alt="Atomic Habits cover" src="atomichabits.jpg">
                   </div>
-                  <div class="book" data-id="b5" data-title="Sapiens" data-author="Yuval Noah Harari" title="Sapiens — Yuval Noah Harari">
-                    <img class="book__img" loading="lazy" alt="Sapiens cover"
-                         src="https://covers.openlibrary.org/b/isbn/9780441013593-L.jpg">
+                  <div class="book" data-id="b2" data-title="Dune" data-author="Frank Herbert" title="Dune — Frank Herbert">
+                    <img class="book__img" loading="lazy" alt="Dune cover" src="dune.jpg">
                   </div>
-                  <div class="book" data-id="b6" data-title="1984" data-author="George Orwell" title="1984 — George Orwell">
-                    <img class="book__img" loading="lazy" alt="1984 cover"
-                         src="https://covers.openlibrary.org/b/isbn/9780132350884-L.jpg">
+                  <div class="book" data-id="b3" data-title="Clean Code" data-author="Robert C. Martin" title="Clean Code — Robert C. Martin">
+                    <img class="book__img" loading="lazy" alt="Clean Code cover" src="cleancode.jpg">
                   </div>
-                  <div class="book" data-id="b7" data-title="The Alchemist" data-author="Paulo Coelho" title="The Alchemist — Paulo Coelho"></div>
-                  <div class="book" data-id="b8" data-title="The Pragmatic Programmer" data-author="Hunt & Thomas" title="The Pragmatic Programmer — Hunt & Thomas"></div>
-                  <div class="book" data-id="b9" data-title="Ikigai" data-author="Garcia & Miralles" title="Ikigai — Garcia & Miralles"></div>
-                </div>
-                <div class="board"></div>
-              </div>
-            </section>
-
-            <section class="shelf" id="shelf-finished" data-shelf="finished">
-              <div class="shelf__head">
-                <h2 class="shelf__title">Finished</h2>
-                <a class="shelf__link" href="#" data-shelf="finished">Full shelf →</a>
-              </div>
-              <div class="shelf__row">
-                <div class="books">
-                  <div class="book" data-id="b10" data-title="Harry Potter" data-author="J.K. Rowling" title="Harry Potter — J.K. Rowling"></div>
-                  <div class="book" data-id="b11" data-title="The Little Prince" data-author="Antoine de Saint-Exupéry" title="The Little Prince — Antoine de Saint-Exupéry"></div>
-                  <div class="book" data-id="b12" data-title="The Great Gatsby" data-author="F. Scott Fitzgerald" title="The Great Gatsby — F. Scott Fitzgerald"></div>
-                  <div class="book" data-id="b13" data-title="Rich Dad Poor Dad" data-author="Robert Kiyosaki" title="Rich Dad Poor Dad — Robert Kiyosaki"></div>
-                  <div class="book" data-id="b14" data-title="Deep Work" data-author="Cal Newport" title="Deep Work — Cal Newport"></div>
-                  <div class="book" data-id="b15" data-title="The Psychology of Money" data-author="Morgan Housel" title="The Psychology of Money — Morgan Housel"></div>
                 </div>
                 <div class="board"></div>
               </div>
@@ -201,29 +130,453 @@
           </section>
         </section>
 
-        <!-- VIEW: ALL BOOKS -->
-        <section class="view" id="view-all" data-view="all" aria-label="All books grid">
-          <div class="all-header">
-            <div class="all-title">
-              <h2>All Books</h2>
-              <p class="all-sub">Tap a book to open details.</p>
+        <section class="view view--active" id="view-home" data-view="home" aria-label="Home page">
+          <div class="home-content">
+            <div class="home-hero">
+              <h1 class="home-hero__title">Welcome back, Stephan!</h1>
+              <p class="home-hero__subtitle">Continue your reading journey</p>
             </div>
 
-            <div class="filters">
-              <select id="sortSelect" class="select" aria-label="Sort books">
-                <option value="title-asc">Sort: Title (A → Z)</option>
-                <option value="title-desc">Sort: Title (Z → A)</option>
-                <option value="author-asc">Sort: Author (A → Z)</option>
-                <option value="author-desc">Sort: Author (Z → A)</option>
+            <div class="home-stats">
+              <div class="stat-card">
+                <div class="stat-card__icon">📚</div>
+                <div class="stat-card__value">15</div>
+                <div class="stat-card__label">Total Books</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-card__icon">📖</div>
+                <div class="stat-card__value">3</div>
+                <div class="stat-card__label">Reading Now</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-card__icon">✅</div>
+                <div class="stat-card__value">6</div>
+                <div class="stat-card__label">Finished</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-card__icon">🔥</div>
+                <div class="stat-card__value">12</div>
+                <div class="stat-card__label">Day Streak</div>
+              </div>
+            </div>
+
+            <section class="home-section">
+              <div class="home-section__header">
+                <h2 class="home-section__title">🔥 Trending This Week</h2>
+                <a href="#" class="home-section__link">See all →</a>
+              </div>
+              <div class="trending-books">
+                <div class="trending-book">
+                  <div class="trending-book__cover">
+                    <img src="sevenhusbands.jpg" alt="The Seven Husbands of Evelyn Hugo" />
+                  </div>
+                  <div class="trending-book__info">
+                    <div class="trending-book__title">The Seven Husbands of Evelyn Hugo</div>
+                    <div class="trending-book__author">Taylor Jenkins Reid</div>
+                    <div class="trending-book__rating">⭐ 4.8</div>
+                  </div>
+                </div>
+                <div class="trending-book">
+                  <div class="trending-book__cover">
+                    <img src="hailmary.jpg" alt="Project Hail Mary" />
+                  </div>
+                  <div class="trending-book__info">
+                    <div class="trending-book__title">Project Hail Mary</div>
+                    <div class="trending-book__author">Andy Weir</div>
+                    <div class="trending-book__rating">⭐ 4.9</div>
+                  </div>
+                </div>
+                <div class="trending-book">
+                  <div class="trending-book__cover">
+                    <img src="midnight.jpg" alt="The Midnight Library" />
+                  </div>
+                  <div class="trending-book__info">
+                    <div class="trending-book__title">The Midnight Library</div>
+                    <div class="trending-book__author">Matt Haig</div>
+                    <div class="trending-book__rating">⭐ 4.7</div>
+                  </div>
+                </div>
+                <div class="trending-book">
+                  <div class="trending-book__cover">
+                    <img src="kazuoishi.jpg" alt="Klara and the Sun" />
+                  </div>
+                  <div class="trending-book__info">
+                    <div class="trending-book__title">Klara and the Sun</div>
+                    <div class="trending-book__author">Kazuo Ishiguro</div>
+                    <div class="trending-book__rating">⭐ 4.6</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="home-section">
+              <div class="home-section__header">
+                <h2 class="home-section__title">📊 Your Reading Digest</h2>
+              </div>
+              <div class="digest-grid">
+                <div class="digest-card">
+                  <div class="digest-card__icon">📈</div>
+                  <div class="digest-card__title">Reading Progress</div>
+                  <div class="digest-card__text">You've read 40% more books this month!</div>
+                </div>
+                <div class="digest-card">
+                  <div class="digest-card__icon">🎯</div>
+                  <div class="digest-card__title">Goal Achievement</div>
+                  <div class="digest-card__text">75% of your yearly goal completed</div>
+                </div>
+                <div class="digest-card">
+                  <div class="digest-card__icon">⭐</div>
+                  <div class="digest-card__title">Favorite Genre</div>
+                  <div class="digest-card__text">Science Fiction & Fantasy</div>
+                </div>
+                <div class="digest-card">
+                  <div class="digest-card__icon">⏱️</div>
+                  <div class="digest-card__title">Average Reading Time</div>
+                  <div class="digest-card__text">45 minutes per day</div>
+                </div>
+              </div>
+            </section>
+
+            <section class="home-section">
+              <div class="home-section__header">
+                <h2 class="home-section__title">💡 Recommendations for You</h2>
+                <a href="#" class="home-section__link">Explore →</a>
+              </div>
+              <div class="recommendations-grid">
+                <div class="recommendation-card">
+                  <div class="recommendation-card__cover">
+                    <img src="psychology.jpg" alt="The Psychology of Money" />
+                  </div>
+                  <div class="recommendation-card__content">
+                    <div class="recommendation-card__title">The Psychology of Money</div>
+                    <div class="recommendation-card__author">Morgan Housel</div>
+                    <div class="recommendation-card__badge">Based on your library</div>
+                  </div>
+                </div>
+                <div class="recommendation-card">
+                  <div class="recommendation-card__cover">
+                    <img src="thinkingfast.jpg" alt="Thinking, Fast and Slow" />
+                  </div>
+                  <div class="recommendation-card__content">
+                    <div class="recommendation-card__title">Thinking, Fast and Slow</div>
+                    <div class="recommendation-card__author">Daniel Kahneman</div>
+                    <div class="recommendation-card__badge">Popular this month</div>
+                  </div>
+                </div>
+                <div class="recommendation-card">
+                  <div class="recommendation-card__cover">
+                    <img src="educated.jpg" alt="Educated" />
+                  </div>
+                  <div class="recommendation-card__content">
+                    <div class="recommendation-card__title">Educated</div>
+                    <div class="recommendation-card__author">Tara Westover</div>
+                    <div class="recommendation-card__badge">Editor's pick</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-shop" data-view="shop" aria-label="Shop page" style="display: none;">
+          <div class="shop-content">
+            <div class="shop-header">
+              <h1 class="shop-header__title">📚 Book Store</h1>
+              <p class="shop-header__subtitle">Discover your next great read</p>
+            </div>
+
+            <div class="shop-filters">
+              <div class="shop-filters__group">
+                <button class="filter-btn is-active">All</button>
+                <button class="filter-btn">Fiction</button>
+                <button class="filter-btn">Non-Fiction</button>
+                <button class="filter-btn">Sci-Fi</button>
+                <button class="filter-btn">Biography</button>
+              </div>
+              <select class="select select--shop" aria-label="Sort shop">
+                <option value="popular">Sort: Popular</option>
+                <option value="newest">Sort: Newest</option>
+                <option value="price-low">Sort: Price: Low to High</option>
+                <option value="price-high">Sort: Price: High to Low</option>
               </select>
             </div>
+
+            <div class="shop-grid">
+              <div class="shop-book">
+                <div class="shop-book__cover">
+                  <img src="sevenhusbands.jpg" alt="The Seven Husbands of Evelyn Hugo" />
+                </div>
+                <div class="shop-book__info">
+                  <div class="shop-book__title">The Seven Husbands of Evelyn Hugo</div>
+                  <div class="shop-book__author">Taylor Jenkins Reid</div>
+                  <div class="shop-book__meta">
+                    <div class="shop-book__price">5,900 ₸</div>
+                    <div class="shop-book__rating">⭐ 4.8</div>
+                  </div>
+                  <button class="shop-book__btn">Add to Library</button>
+                </div>
+              </div>
+              <div class="shop-book">
+                <div class="shop-book__cover">
+                  <img src="hailmary.jpg" alt="Project Hail Mary" />
+                </div>
+                <div class="shop-book__info">
+                  <div class="shop-book__title">Project Hail Mary</div>
+                  <div class="shop-book__author">Andy Weir</div>
+                  <div class="shop-book__meta">
+                    <div class="shop-book__price">6,800 ₸</div>
+                    <div class="shop-book__rating">⭐ 4.9</div>
+                  </div>
+                  <button class="shop-book__btn">Add to Library</button>
+                </div>
+              </div>
+              <div class="shop-book">
+                <div class="shop-book__cover">
+                  <img src="midnight.jpg" alt="The Midnight Library" />
+                </div>
+                <div class="shop-book__info">
+                  <div class="shop-book__title">The Midnight Library</div>
+                  <div class="shop-book__author">Matt Haig</div>
+                  <div class="shop-book__meta">
+                    <div class="shop-book__price">5,500 ₸</div>
+                    <div class="shop-book__rating">⭐ 4.7</div>
+                  </div>
+                  <button class="shop-book__btn">Add to Library</button>
+                </div>
+              </div>
+              <div class="shop-book">
+                <div class="shop-book__cover">
+                  <img src="kazuoishi.jpg" alt="Klara and the Sun" />
+                </div>
+                <div class="shop-book__info">
+                  <div class="shop-book__title">Klara and the Sun</div>
+                  <div class="shop-book__author">Kazuo Ishiguro</div>
+                  <div class="shop-book__meta">
+                    <div class="shop-book__price">6,300 ₸</div>
+                    <div class="shop-book__rating">⭐ 4.6</div>
+                  </div>
+                  <button class="shop-book__btn">Add to Library</button>
+                </div>
+              </div>
+              <div class="shop-book">
+                <div class="shop-book__cover">
+                  <img src="psychology.jpg" alt="The Psychology of Money" />
+                </div>
+                <div class="shop-book__info">
+                  <div class="shop-book__title">The Psychology of Money</div>
+                  <div class="shop-book__author">Morgan Housel</div>
+                  <div class="shop-book__meta">
+                    <div class="shop-book__price">5,000 ₸</div>
+                    <div class="shop-book__rating">⭐ 4.8</div>
+                  </div>
+                  <button class="shop-book__btn">Add to Library</button>
+                </div>
+              </div>
+              <div class="shop-book">
+                <div class="shop-book__cover">
+                  <img src="thinkingfast.jpg" alt="Thinking, Fast and Slow" />
+                </div>
+                <div class="shop-book__info">
+                  <div class="shop-book__title">Thinking, Fast and Slow</div>
+                  <div class="shop-book__author">Daniel Kahneman</div>
+                  <div class="shop-book__meta">
+                    <div class="shop-book__price">7,200 ₸</div>
+                    <div class="shop-book__rating">⭐ 4.7</div>
+                  </div>
+                  <button class="shop-book__btn">Add to Library</button>
+                </div>
+              </div>
+            </div>
           </div>
+        </section>
 
-          <div class="all-grid" id="allGrid"></div>
+        <section class="view" id="view-news" data-view="news" aria-label="News page" style="display: none;">
+          <div class="news-content">
+            <div class="news-header">
+              <h1 class="news-header__title">📰 Book News & Reviews</h1>
+              <p class="news-header__subtitle">Stay updated with the latest in literature</p>
+            </div>
 
-          <div class="empty" id="emptyState" hidden>
-            <div class="empty__title">No results</div>
-            <div class="empty__text">Try another search.</div>
+            <div class="news-featured">
+              <div class="news-featured__image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+              <div class="news-featured__content">
+                <div class="news-featured__badge">Featured</div>
+                <h2 class="news-featured__title">The Future of Reading: Digital vs Physical Books</h2>
+                <p class="news-featured__text">Exploring how technology is reshaping our reading habits and what it means for book lovers worldwide...</p>
+                <div class="news-featured__meta">
+                  <span class="news-featured__date">March 15, 2024</span>
+                  <span class="news-featured__author">By Sarah Johnson</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="news-grid">
+              <article class="news-card">
+                <div class="news-card__image" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                <div class="news-card__content">
+                  <div class="news-card__category">Review</div>
+                  <h3 class="news-card__title">"Project Hail Mary" - A Masterpiece of Science Fiction</h3>
+                  <p class="news-card__excerpt">Andy Weir delivers another thrilling space adventure that keeps readers on the edge of their seats...</p>
+                  <div class="news-card__meta">
+                    <span>March 12, 2024</span>
+                    <span>•</span>
+                    <span>5 min read</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="news-card">
+                <div class="news-card__image" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                <div class="news-card__content">
+                  <div class="news-card__category">Interview</div>
+                  <h3 class="news-card__title">Exclusive: Author Matt Haig on Mental Health in Literature</h3>
+                  <p class="news-card__excerpt">The acclaimed author discusses how his personal experiences shape his writing and the importance of mental health awareness...</p>
+                  <div class="news-card__meta">
+                    <span>March 10, 2024</span>
+                    <span>•</span>
+                    <span>8 min read</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="news-card">
+                <div class="news-card__image" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);"></div>
+                <div class="news-card__content">
+                  <div class="news-card__category">Awards</div>
+                  <h3 class="news-card__title">2024 Literary Awards: Winners Announced</h3>
+                  <p class="news-card__excerpt">Celebrating the best books of the year across multiple genres, from fiction to non-fiction...</p>
+                  <div class="news-card__meta">
+                    <span>March 8, 2024</span>
+                    <span>•</span>
+                    <span>6 min read</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="news-card">
+                <div class="news-card__image" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);"></div>
+                <div class="news-card__content">
+                  <div class="news-card__category">Trending</div>
+                  <h3 class="news-card__title">Top 10 Books to Read This Spring</h3>
+                  <p class="news-card__excerpt">Our curated list of must-read books for the spring season, featuring new releases and timeless classics...</p>
+                  <div class="news-card__meta">
+                    <span>March 5, 2024</span>
+                    <span>•</span>
+                    <span>7 min read</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="view-profile" data-view="profile" aria-label="Profile page" style="display: none;">
+          <div class="profile-content">
+            <div class="profile-header">
+              <div class="profile-header__avatar">S</div>
+              <div class="profile-header__info">
+                <h1 class="profile-header__name">Stephan</h1>
+                <p class="profile-header__email">stephan@readowl.com</p>
+                <div class="profile-header__badge">Premium Member</div>
+              </div>
+              <button class="profile-header__edit">Edit Profile</button>
+            </div>
+
+            <div class="profile-stats">
+              <div class="profile-stat">
+                <div class="profile-stat__value">15</div>
+                <div class="profile-stat__label">Books in Library</div>
+              </div>
+              <div class="profile-stat">
+                <div class="profile-stat__value">42</div>
+                <div class="profile-stat__label">Books Read</div>
+              </div>
+              <div class="profile-stat">
+                <div class="profile-stat__value">12</div>
+                <div class="profile-stat__label">Day Streak</div>
+              </div>
+              <div class="profile-stat">
+                <div class="profile-stat__value">1,250</div>
+                <div class="profile-stat__label">Pages Read</div>
+              </div>
+            </div>
+
+            <div class="profile-sections">
+              <section class="profile-section">
+                <h2 class="profile-section__title">Reading Goals</h2>
+                <div class="profile-goal">
+                  <div class="profile-goal__header">
+                    <span class="profile-goal__name">2024 Reading Challenge</span>
+                    <span class="profile-goal__progress">15 / 50 books</span>
+                  </div>
+                  <div class="profile-goal__bar">
+                    <div class="profile-goal__fill" style="width: 30%"></div>
+                  </div>
+                </div>
+                <div class="profile-goal">
+                  <div class="profile-goal__header">
+                    <span class="profile-goal__name">Daily Reading Goal</span>
+                    <span class="profile-goal__progress">45 / 60 minutes</span>
+                  </div>
+                  <div class="profile-goal__bar">
+                    <div class="profile-goal__fill" style="width: 75%"></div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="profile-section">
+                <h2 class="profile-section__title">Achievements</h2>
+                <div class="achievements-grid">
+                  <div class="achievement">
+                    <div class="achievement__icon">🏆</div>
+                    <div class="achievement__name">Bookworm</div>
+                    <div class="achievement__desc">Read 10 books</div>
+                  </div>
+                  <div class="achievement">
+                    <div class="achievement__icon">🔥</div>
+                    <div class="achievement__name">Streak Master</div>
+                    <div class="achievement__desc">7 day reading streak</div>
+                  </div>
+                  <div class="achievement">
+                    <div class="achievement__icon">⭐</div>
+                    <div class="achievement__name">Reviewer</div>
+                    <div class="achievement__desc">Reviewed 5 books</div>
+                  </div>
+                  <div class="achievement achievement--locked">
+                    <div class="achievement__icon">📚</div>
+                    <div class="achievement__name">Scholar</div>
+                    <div class="achievement__desc">Read 50 books</div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="profile-section">
+                <h2 class="profile-section__title">Settings</h2>
+                <div class="settings-list">
+                  <div class="setting-item">
+                    <span class="setting-item__label">Notifications</span>
+                    <label class="setting-toggle">
+                      <input type="checkbox" checked>
+                      <span class="setting-toggle__slider"></span>
+                    </label>
+                  </div>
+                  <div class="setting-item">
+                    <span class="setting-item__label">Dark Mode</span>
+                    <label class="setting-toggle">
+                      <input type="checkbox">
+                      <span class="setting-toggle__slider"></span>
+                    </label>
+                  </div>
+                  <div class="setting-item">
+                    <span class="setting-item__label">Reading Reminders</span>
+                    <label class="setting-toggle">
+                      <input type="checkbox" checked>
+                      <span class="setting-toggle__slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </section>
+            </div>
           </div>
         </section>
 
@@ -231,7 +584,6 @@
     </div>
   </div>
 
-  <!-- Modal -->
   <div class="modal" id="bookModal" aria-hidden="true">
     <div class="modal__backdrop" data-close="1"></div>
     <div class="modal__panel" role="dialog" aria-modal="true">

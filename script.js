@@ -1,67 +1,49 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-  const norm = (s) => (s || "").toLowerCase().trim();
+$(document).ready(function() {
+  'use strict';
 
   const LS = {
     SHELVES_MAP: "readowl.shelvesMap",
-    ACTIVE_TAB: "readowl.activeTab",   // shelves | all
+    ACTIVE_TAB: "readowl.activeTab",
     SEARCH: "readowl.search",
     SORT: "readowl.sort",
-    ACTIVE_PAGE: "readowl.activePage", // home | library | shop | news | profile
+    ACTIVE_PAGE: "readowl.activePage",
+    SHOP_FILTER: "readowl.shopFilter",
+    SHOP_SORT: "readowl.shopSort",
+    PROFILE_SETTINGS: "readowl.profileSettings",
+    READING_STATS: "readowl.readingStats",
+    FAVORITES: "readowl.favorites",
+    RECENT_VIEWED: "readowl.recentViewed"
   };
 
-  // ---------------------------
-  // Elements
-  // ---------------------------
-  const main = $(".main");
-  const mainTopbar = $(".main > .topbar");
+  const norm = (s) => (s || "").toLowerCase().trim();
 
-  const tabsWrap = $(".tabs");
-  const tabs = $$(".tab");
-  const views = $$(".view");
+  const $main = $(".main");
+  const $mainTopbar = $(".main > .topbar");
+  const $tabsWrap = $(".tabs");
+  const $tabs = $(".tab");
+  const $views = $(".view");
+  const $searchInput = $("#searchInput");
+  const $searchWrap = $(".search");
+  const $allView = $("#view-all");
+  const $allGrid = $("#allGrid");
+  const $sortSelect = $("#sortSelect");
+  const $emptyState = $("#emptyState");
+  const $modal = $("#bookModal");
+  const $mTitle = $("#mTitle");
+  const $mMeta = $("#mMeta");
+  const $mShelf = $("#mShelf");
+  const $mSave = $("#mSave");
+  const $mToast = $("#mToast");
+  const $menuLinks = $(".menu__item");
+  const $profileBtn = $(".profile");
+  const $miniProfileBtn = $(".mini-profile");
 
-  const searchInput = $("#searchInput");
-  const searchWrap = $(".search");
-
-  const allView = $("#view-all");
-  const allGrid = $("#allGrid");
-  const sortSelect = $("#sortSelect");
-  const emptyState = $("#emptyState");
-
-  const modal = $("#bookModal");
-  const mTitle = $("#mTitle");
-  const mMeta = $("#mMeta");
-  const mShelf = $("#mShelf");
-  const mSave = $("#mSave");
-  const mToast = $("#mToast");
-
-  // Sidebar / profile buttons
-  const menuLinks = $$(".menu__item");
-  const profileBtn = $(".profile");
-  const miniProfileBtn = $(".mini-profile");
-
-  // ---------------------------
-  // Make menu items identifiable (NO HTML change needed)
-  // Order in HTML: Home, My library, Shop, News
-  // ---------------------------
-  if (menuLinks[0]) menuLinks[0].dataset.page = "home";
-  if (menuLinks[1]) menuLinks[1].dataset.page = "library";
-  if (menuLinks[2]) menuLinks[2].dataset.page = "shop";
-  if (menuLinks[3]) menuLinks[3].dataset.page = "news";
-
-  // ---------------------------
-  // Shelves containers
-  // ---------------------------
   const shelfContainers = {
     current: $("#shelf-current .books"),
     next: $("#shelf-next .books"),
     finished: $("#shelf-finished .books"),
   };
 
-  // ---------------------------
-  // LocalStorage restore (shelf map)
-  // ---------------------------
   const savedMap = (() => {
     try {
       return JSON.parse(localStorage.getItem(LS.SHELVES_MAP) || "{}");
@@ -74,77 +56,146 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem(LS.SHELVES_MAP, JSON.stringify(savedMap));
   }
 
-  function moveBookToShelf(bookEl, shelfKey) {
-    const target = shelfContainers[shelfKey];
-    if (!target) return;
-
-    target.appendChild(bookEl);
-    bookEl.dataset.shelf = shelfKey;
-    savedMap[bookEl.dataset.id] = shelfKey;
-    saveShelfMap();
+  function getLocalStorage(key, defaultValue = null) {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
   }
 
-  // Restore moved books
-  Object.entries(savedMap).forEach(([bookId, shelfKey]) => {
-    const book = $(`.book[data-id="${CSS.escape(bookId)}"]`);
-    if (book && shelfContainers[shelfKey]) {
-      shelfContainers[shelfKey].appendChild(book);
-      book.dataset.shelf = shelfKey;
+  function setLocalStorage(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (e) {
+      console.error("Error saving to localStorage:", e);
+    }
+  }
+
+  function initParallax() {
+    $(window).on('scroll', function() {
+      const scrolled = $(window).scrollTop();
+      const parallaxElements = $('.parallax-element');
+      
+      parallaxElements.each(function() {
+        const $el = $(this);
+        const speed = $el.data('speed') || 0.5;
+        const yPos = -(scrolled * speed);
+        $el.css('transform', `translateY(${yPos}px)`);
+      });
+
+      $('.home-hero, .shop-header, .news-header').each(function() {
+        const $hero = $(this);
+        const heroTop = $hero.offset().top;
+        const heroHeight = $hero.outerHeight();
+        const scrollTop = $(window).scrollTop();
+        const windowHeight = $(window).height();
+        
+        if (scrollTop + windowHeight > heroTop && scrollTop < heroTop + heroHeight) {
+          const progress = (scrollTop + windowHeight - heroTop) / (heroHeight + windowHeight);
+          $hero.find('.parallax-bg').css('transform', `translateY(${progress * 30}px)`);
+        }
+      });
+    });
+
+    $('.stat-card, .trending-book, .shop-book, .news-card').on('mousemove', function(e) {
+      const $card = $(this);
+      const cardOffset = $card.offset();
+      const x = e.pageX - cardOffset.left;
+      const y = e.pageY - cardOffset.top;
+      const centerX = $card.outerWidth() / 2;
+      const centerY = $card.outerHeight() / 2;
+      const moveX = (x - centerX) / 10;
+      const moveY = (y - centerY) / 10;
+      
+      $card.css('transform', `translateY(-4px) rotateX(${-moveY}deg) rotateY(${moveX}deg)`);
+    }).on('mouseleave', function() {
+      $(this).css('transform', 'translateY(0) rotateX(0) rotateY(0)');
+    });
+  }
+
+  function initAnimations() {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          $(entry.target).addClass('animate-in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    $('.stat-card, .trending-book, .digest-card, .recommendation-card, .shop-book, .news-card, .achievement').each(function() {
+      observer.observe(this);
+    });
+
+    $('.home-stats, .trending-books, .digest-grid, .shop-grid, .news-grid').children().each(function(index) {
+      $(this).css('animation-delay', `${index * 0.1}s`);
+    });
+  }
+
+  function moveBookToShelf(bookEl, shelfKey) {
+    const $book = $(bookEl);
+    const target = shelfContainers[shelfKey];
+    if (!target || !target.length) return;
+
+    target.append($book);
+    $book.attr('data-shelf', shelfKey);
+    savedMap[$book.data('id')] = shelfKey;
+    saveShelfMap();
+    
+    $book.css({
+      transform: 'scale(0.8)',
+      opacity: 0
+    }).animate({
+      opacity: 1
+    }, 300).css('transform', 'scale(1)');
+  }
+
+  $.each(savedMap, function(bookId, shelfKey) {
+    const $book = $(`.book[data-id="${bookId}"]`);
+    const target = shelfContainers[shelfKey];
+    if ($book.length && target.length) {
+      target.append($book);
+      $book.attr('data-shelf', shelfKey);
     }
   });
 
-  // Ensure each book knows current shelf
-  $$(".shelf").forEach((shelf) => {
-    const shelfKey = shelf.dataset.shelf;
-    $$(".book", shelf).forEach((b) => {
-      if (!b.dataset.shelf) b.dataset.shelf = shelfKey;
+  $(".shelf").each(function() {
+    const shelfKey = $(this).data('shelf');
+    $(this).find(".book").each(function() {
+      if (!$(this).data('shelf')) {
+        $(this).attr('data-shelf', shelfKey);
+      }
     });
   });
 
-  // ---------------------------
-  // "Empty main" pages (Home/Shop/News/Profile)
-  // ---------------------------
-  const libraryNodes = []; // store nodes that belong to library (views + shelf panel)
-  views.forEach((v) => libraryNodes.push(v));
-
   function clearMainKeepTopbar() {
-    // remove shelf panel if exists
-    const panel = $("#shelfPanel");
-    if (panel) panel.remove();
-
-    // hide library UI parts
-    if (tabsWrap) tabsWrap.style.display = "none";
-    if (searchWrap) searchWrap.style.display = "none";
-    views.forEach((v) => (v.style.display = "none"));
+    $("#shelfPanel").remove();
+    $tabsWrap.hide();
+    $searchWrap.hide();
+    $("#view-shelves, #view-all").hide().removeClass('view--active');
   }
 
   function showLibrary() {
-    // show library UI parts
-    if (tabsWrap) tabsWrap.style.display = "";
-    if (searchWrap) searchWrap.style.display = "";
-    views.forEach((v) => (v.style.display = ""));
-
-    // restore tab state
-    const tab = localStorage.getItem(LS.ACTIVE_TAB) || "shelves";
-    setActiveTab(tab);
-
-    applySearch(searchInput?.value || "");
+    $("#view-home, #view-shop, #view-news, #view-profile").hide().removeClass('view--active');
+    $("#view-shelves").show().addClass('view--active');
+    $tabsWrap.hide();
+    $searchWrap.hide();
   }
 
-  // ---------------------------
-  // Sidebar active state
-  // ---------------------------
   function setActiveMenu(pageKey) {
-    menuLinks.forEach((a) => {
-      const isActive = a.dataset.page === pageKey;
-      a.classList.toggle("is-active", isActive);
-      if (isActive) a.setAttribute("aria-current", "page");
-      else a.removeAttribute("aria-current");
-    });
+    $menuLinks.removeClass('is-active').removeAttr('aria-current');
+    $menuLinks.filter(`[data-page="${pageKey}"]`).addClass('is-active').attr('aria-current', 'page');
   }
 
   function setActivePage(pageKey) {
-    localStorage.setItem(LS.ACTIVE_PAGE, pageKey);
+    setLocalStorage(LS.ACTIVE_PAGE, pageKey);
     setActiveMenu(pageKey);
 
     if (pageKey === "library") {
@@ -152,206 +203,246 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // for Home/Shop/News/Profile => just clear main content (library hidden)
     clearMainKeepTopbar();
+    
+    const pageViews = {
+      home: $("#view-home"),
+      shop: $("#view-shop"),
+      news: $("#view-news"),
+      profile: $("#view-profile")
+    };
+    
+    $.each(pageViews, function(key, $view) {
+      if ($view.length) {
+        $view.hide().removeClass('view--active');
+      }
+    });
+    
+    const $selectedView = pageViews[pageKey];
+    if ($selectedView && $selectedView.length) {
+      $selectedView.fadeIn(300).addClass('view--active');
+      
+      if (pageKey === 'home') {
+        updateReadingStats();
+      }
+    }
   }
 
-  // Attach menu clicks
-  menuLinks.forEach((a) => {
-    a.addEventListener("click", (e) => {
-      e.preventDefault();
-      const page = a.dataset.page || "library";
-      setActivePage(page);
-    });
+  $menuLinks.on('click', function(e) {
+    e.preventDefault();
+    const page = $(this).data('page') || "library";
+    setActivePage(page);
   });
 
-  // Profile click -> profile page (empty main)
-  if (profileBtn) {
-    profileBtn.addEventListener("click", () => setActivePage("profile"));
-    profileBtn.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") setActivePage("profile");
-    });
-  }
-  if (miniProfileBtn) miniProfileBtn.addEventListener("click", () => setActivePage("profile"));
+  $profileBtn.on('click', function() {
+    setActivePage("profile");
+  });
 
-  // ---------------------------
-  // Tabs / Views (library)
-  // ---------------------------
+  $miniProfileBtn.on('click', function() {
+    setActivePage("profile");
+  });
+
   function setActiveTab(tabName) {
-    tabs.forEach((t) => {
-      const active = t.dataset.tab === tabName;
-      t.classList.toggle("is-active", active);
-      t.setAttribute("aria-selected", active ? "true" : "false");
-    });
+    $tabs.removeClass('is-active').attr('aria-selected', 'false');
+    $tabs.filter(`[data-tab="${tabName}"]`).addClass('is-active').attr('aria-selected', 'true');
 
-    views.forEach((v) => v.classList.toggle("view--active", v.dataset.view === tabName));
-    localStorage.setItem(LS.ACTIVE_TAB, tabName);
+    $views.removeClass('view--active');
+    $views.filter(`[data-view="${tabName}"]`).addClass('view--active');
+    
+    setLocalStorage(LS.ACTIVE_TAB, tabName);
 
-    if (tabName === "all") renderAllGrid(getAllBooksData());
+    if (tabName === "all") {
+      renderAllGrid(getAllBooksData());
+    }
 
-    applySearch(searchInput?.value || "");
+    applySearch($searchInput.val() || "");
   }
 
-  tabs.forEach((t) => t.addEventListener("click", () => setActiveTab(t.dataset.tab)));
+  $tabs.on('click', function() {
+    setActiveTab($(this).data('tab'));
+  });
 
-  // ---------------------------
-  // Search
-  // ---------------------------
   function applySearch(q) {
     const query = norm(q);
-    localStorage.setItem(LS.SEARCH, q || "");
+    setLocalStorage(LS.SEARCH, q || "");
 
-    $$(".shelves .book").forEach((b) => {
-      const ok =
-        !query ||
-        norm(b.dataset.title).includes(query) ||
-        norm(b.dataset.author).includes(query);
-      b.classList.toggle("is-hidden", !ok);
+    $(".shelves .book").each(function() {
+      const $book = $(this);
+      const title = norm($book.data('title') || '');
+      const author = norm($book.data('author') || '');
+      const ok = !query || title.includes(query) || author.includes(query);
+      
+      $book.toggleClass('is-hidden', !ok);
+      
+      if (ok) {
+        $book.fadeIn(200);
+      } else {
+        $book.fadeOut(200);
+      }
     });
 
-    if (allView?.classList.contains("view--active")) filterAllGrid(query);
-    if (shelfPanelState.open) filterPanelGrid(query);
+    if ($allView.hasClass('view--active')) {
+      filterAllGrid(query);
+    }
+    if (shelfPanelState.open) {
+      filterPanelGrid(query);
+    }
   }
 
-  if (searchInput) {
-    const savedSearch = localStorage.getItem(LS.SEARCH) || "";
-    searchInput.value = savedSearch;
-    searchInput.addEventListener("input", (e) => applySearch(e.target.value));
+  const savedSearch = getLocalStorage(LS.SEARCH, "");
+  if ($searchInput.length) {
+    $searchInput.val(savedSearch);
+    $searchInput.on('input', function() {
+      applySearch($(this).val());
+    });
   }
 
-  // ---------------------------
-  // All Books grid
-  // ---------------------------
   function getAllBooksData() {
-    return $$(".shelves .book").map((b) => ({
-      id: b.dataset.id,
-      title: b.dataset.title || "Book",
-      author: b.dataset.author || "",
-      isbn: b.dataset.isbn || "",
-      shelf: b.dataset.shelf || b.closest(".shelf")?.dataset.shelf || "",
-    }));
+    const books = [];
+    $(".shelves .book").each(function() {
+      const $book = $(this);
+      books.push({
+        id: $book.data('id'),
+        title: $book.data('title') || "Book",
+        author: $book.data('author') || "",
+        isbn: $book.data('isbn') || "",
+        shelf: $book.data('shelf') || $book.closest(".shelf").data('shelf') || "",
+      });
+    });
+    return books;
   }
 
   function renderAllGrid(data) {
-    if (!allGrid) return;
-    allGrid.innerHTML = "";
+    if (!$allGrid.length) return;
+    $allGrid.empty();
 
-    data.forEach((item) => {
-      const card = document.createElement("div");
-      card.className = "book-card";
-      card.dataset.id = item.id;
-      card.dataset.title = item.title;
-      card.dataset.author = item.author;
+    $.each(data, function(index, item) {
+      const $card = $('<div>').addClass('book-card')
+        .attr('data-id', item.id)
+        .attr('data-title', item.title)
+        .attr('data-author', item.author)
+        .css('animation-delay', `${index * 0.05}s`);
 
-      const cover = document.createElement("div");
-      cover.className = "book-cover";
+      const $cover = $('<div>').addClass('book-cover');
       if (item.isbn) {
-        cover.style.backgroundImage = `url("https://covers.openlibrary.org/b/isbn/${encodeURIComponent(item.isbn)}-L.jpg")`;
-        cover.style.backgroundSize = "cover";
-        cover.style.backgroundPosition = "center";
+        $cover.css({
+          backgroundImage: `url("https://covers.openlibrary.org/b/isbn/${encodeURIComponent(item.isbn)}-L.jpg")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        });
       }
 
-      const name = document.createElement("div");
-      name.className = "book-name";
-      name.textContent = item.title;
+      const $name = $('<div>').addClass('book-name').text(item.title);
+      const $author = $('<div>').addClass('book-author').text(item.author);
 
-      const author = document.createElement("div");
-      author.className = "book-author";
-      author.textContent = item.author;
-
-      card.append(cover, name, author);
-      card.addEventListener("click", () => openModal(item.id));
-      allGrid.appendChild(card);
+      $card.append($cover, $name, $author);
+      $card.on('click', function() {
+        openModal(item.id);
+      });
+      
+      $allGrid.append($card);
     });
 
-    sortAllGrid(sortSelect?.value || "title-asc");
-    filterAllGrid(searchInput?.value || "");
+    const sortMode = $sortSelect.val() || "title-asc";
+    sortAllGrid(sortMode);
+    filterAllGrid($searchInput.val() || "");
   }
 
   function filterAllGrid(queryRaw) {
     const query = norm(queryRaw);
-    const cards = $$(".book-card", allGrid);
     let visible = 0;
 
-    cards.forEach((c) => {
-      const ok =
-        !query ||
-        norm(c.dataset.title).includes(query) ||
-        norm(c.dataset.author).includes(query);
-      c.hidden = !ok;
-      if (ok) visible++;
+    $(".book-card", $allGrid).each(function() {
+      const $card = $(this);
+      const title = norm($card.data('title') || '');
+      const author = norm($card.data('author') || '');
+      const ok = !query || title.includes(query) || author.includes(query);
+      
+      if (ok) {
+        $card.fadeIn(200);
+        visible++;
+      } else {
+        $card.fadeOut(200);
+      }
     });
 
-    if (emptyState) emptyState.hidden = visible !== 0;
+    $emptyState.toggle(visible === 0);
   }
 
   function sortAllGrid(mode) {
-    if (!allGrid) return;
+    if (!$allGrid.length) return;
     const [field, dir] = (mode || "title-asc").split("-");
     const mul = dir === "desc" ? -1 : 1;
 
-    const cards = $$(".book-card", allGrid);
-    cards.sort((a, b) => {
-      const av = norm(a.dataset[field]);
-      const bv = norm(b.dataset[field]);
+    const $cards = $(".book-card", $allGrid);
+    const cardsArray = $cards.toArray();
+    
+    cardsArray.sort((a, b) => {
+      const $a = $(a);
+      const $b = $(b);
+      const av = norm($a.data(field) || '');
+      const bv = norm($b.data(field) || '');
       if (av < bv) return -1 * mul;
       if (av > bv) return 1 * mul;
       return 0;
     });
 
-    cards.forEach((c) => allGrid.appendChild(c));
-  }
-
-  if (sortSelect) {
-    const savedSort = localStorage.getItem(LS.SORT) || "title-asc";
-    sortSelect.value = savedSort;
-
-    sortSelect.addEventListener("change", (e) => {
-      localStorage.setItem(LS.SORT, e.target.value);
-      sortAllGrid(e.target.value);
-      filterAllGrid(searchInput?.value || "");
+    $.each(cardsArray, function() {
+      $allGrid.append(this);
     });
   }
 
-  // ---------------------------
-  // Full shelf top panel
-  // ---------------------------
+  if ($sortSelect.length) {
+    const savedSort = getLocalStorage(LS.SORT, "title-asc");
+    $sortSelect.val(savedSort);
+    $sortSelect.on('change', function() {
+      const value = $(this).val();
+      setLocalStorage(LS.SORT, value);
+      sortAllGrid(value);
+      filterAllGrid($searchInput.val() || "");
+    });
+  }
+
   const shelfPanelState = { open: false, shelfKey: null };
 
   function ensureShelfPanel() {
-    if ($("#shelfPanel")) return;
+    if ($("#shelfPanel").length) return;
 
-    const panel = document.createElement("div");
-    panel.id = "shelfPanel";
-    panel.className = "shelf-panel";
-    panel.hidden = true;
-
-    panel.innerHTML = `
-      <div class="shelf-panel__head">
-        <button class="shelf-panel__back" type="button" id="shelfPanelBack">← Back</button>
-        <div class="shelf-panel__titles">
-          <div class="shelf-panel__title" id="shelfPanelTitle">Shelf</div>
-          <div class="shelf-panel__sub">All books from this shelf</div>
+    const $panel = $('<div>')
+      .attr('id', 'shelfPanel')
+      .addClass('shelf-panel')
+      .hide()
+      .html(`
+        <div class="shelf-panel__head">
+          <button class="shelf-panel__back" type="button" id="shelfPanelBack">← Back</button>
+          <div class="shelf-panel__titles">
+            <div class="shelf-panel__title" id="shelfPanelTitle">Shelf</div>
+            <div class="shelf-panel__sub">All books from this shelf</div>
+          </div>
         </div>
-      </div>
-      <div class="shelf-panel__grid" id="shelfPanelGrid"></div>
-      <div class="empty" id="shelfPanelEmpty" hidden>
-        <div class="empty__title">No results</div>
-        <div class="empty__text">Try another search.</div>
-      </div>
-    `;
+        <div class="shelf-panel__grid" id="shelfPanelGrid"></div>
+        <div class="empty" id="shelfPanelEmpty" hidden>
+          <div class="empty__title">No results</div>
+          <div class="empty__text">Try another search.</div>
+        </div>
+      `);
 
-    if (mainTopbar) mainTopbar.insertAdjacentElement("afterend", panel);
-    else main.insertAdjacentElement("afterbegin", panel);
+    if ($mainTopbar.length) {
+      $mainTopbar.after($panel);
+    } else {
+      $main.prepend($panel);
+    }
 
-    $("#shelfPanelBack").addEventListener("click", closeShelfPanel);
+    $("#shelfPanelBack").on('click', closeShelfPanel);
   }
 
   function shelfNameByKey(key) {
-    if (key === "current") return "Currently reading";
-    if (key === "next") return "Next up";
-    if (key === "finished") return "Finished";
-    return "Shelf";
+    const names = {
+      current: "Currently reading",
+      next: "Next up",
+      finished: "Finished"
+    };
+    return names[key] || "Shelf";
   }
 
   function openShelfPanel(shelfKey) {
@@ -359,148 +450,303 @@ document.addEventListener("DOMContentLoaded", () => {
     shelfPanelState.open = true;
     shelfPanelState.shelfKey = shelfKey;
 
-    const panel = $("#shelfPanel");
-    panel.hidden = false;
-
-    $("#shelfPanelTitle").textContent = shelfNameByKey(shelfKey);
-
+    const $panel = $("#shelfPanel");
+    $("#shelfPanelTitle").text(shelfNameByKey(shelfKey));
+    
+    $panel.slideDown(300);
     buildShelfPanelGrid(shelfKey);
-    filterPanelGrid(searchInput?.value || "");
+    filterPanelGrid($searchInput.val() || "");
   }
 
   function closeShelfPanel() {
-    const panel = $("#shelfPanel");
-    if (!panel) return;
+    const $panel = $("#shelfPanel");
+    if (!$panel.length) return;
     shelfPanelState.open = false;
     shelfPanelState.shelfKey = null;
-    panel.hidden = true;
+    $panel.slideUp(300);
   }
 
   function buildShelfPanelGrid(shelfKey) {
-    const grid = $("#shelfPanelGrid");
-    if (!grid) return;
-    grid.innerHTML = "";
+    const $grid = $("#shelfPanelGrid");
+    if (!$grid.length) return;
+    $grid.empty();
 
-    const books = $$(`.shelves .book[data-shelf="${CSS.escape(shelfKey)}"]`);
+    $(`.shelves .book[data-shelf="${shelfKey}"]`).each(function(index) {
+      const $b = $(this);
+      const $card = $('<button>')
+        .attr('type', 'button')
+        .addClass('panel-book')
+        .attr('data-id', $b.data('id'))
+        .attr('data-title', $b.data('title') || '')
+        .attr('data-author', $b.data('author') || '')
+        .css('animation-delay', `${index * 0.05}s`);
 
-    books.forEach((b) => {
-      const card = document.createElement("button");
-      card.type = "button";
-      card.className = "panel-book";
-      card.dataset.id = b.dataset.id;
-      card.dataset.title = b.dataset.title || "";
-      card.dataset.author = b.dataset.author || "";
-
-      const img = $(".book__img", b);
-      if (img?.src) {
-        card.style.backgroundImage = `url("${img.src}")`;
-        card.style.backgroundSize = "cover";
-        card.style.backgroundPosition = "center";
+      const $img = $b.find(".book__img");
+      if ($img.length && $img.attr('src')) {
+        $card.css({
+          backgroundImage: `url("${$img.attr('src')}")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        });
       }
 
-      card.title = `${b.dataset.title || "Book"} — ${b.dataset.author || ""}`;
-      card.addEventListener("click", () => openModal(b.dataset.id));
-      grid.appendChild(card);
+      $card.attr('title', `${$b.data('title') || "Book"} — ${$b.data('author') || ""}`);
+      $card.on('click', function() {
+        openModal($b.data('id'));
+      });
+      
+      $grid.append($card);
     });
   }
 
   function filterPanelGrid(queryRaw) {
     const query = norm(queryRaw);
-    const grid = $("#shelfPanelGrid");
-    const empty = $("#shelfPanelEmpty");
-    if (!grid) return;
+    const $grid = $("#shelfPanelGrid");
+    const $empty = $("#shelfPanelEmpty");
+    if (!$grid.length) return;
 
-    const cards = $$(".panel-book", grid);
     let visible = 0;
-
-    cards.forEach((c) => {
-      const ok =
-        !query ||
-        norm(c.dataset.title).includes(query) ||
-        norm(c.dataset.author).includes(query);
-      c.hidden = !ok;
-      if (ok) visible++;
+    $(".panel-book", $grid).each(function() {
+      const $card = $(this);
+      const title = norm($card.data('title') || '');
+      const author = norm($card.data('author') || '');
+      const ok = !query || title.includes(query) || author.includes(query);
+      
+      if (ok) {
+        $card.fadeIn(200);
+        visible++;
+      } else {
+        $card.fadeOut(200);
+      }
     });
 
-    if (empty) empty.hidden = visible !== 0;
+    $empty.toggle(visible === 0);
   }
 
-  $$(".shelf__link").forEach((link) => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      const parentShelf = link.closest(".shelf");
-      const shelfKey = link.dataset.shelf || parentShelf?.dataset.shelf || "next";
-      setActivePage("library");
-      openShelfPanel(shelfKey);
-    });
+  $(".shelf__link").on('click', function(e) {
+    e.preventDefault();
+    const $link = $(this);
+    const shelfKey = $link.data('shelf') || $link.closest(".shelf").data('shelf') || "next";
+    setActivePage("library");
+    openShelfPanel(shelfKey);
   });
 
-  // ---------------------------
-  // Modal
-  // ---------------------------
   function openModal(bookId) {
-    const book = $(`.shelves .book[data-id="${CSS.escape(bookId)}"]`);
-    if (!book) return;
+    const $book = $(`.shelves .book[data-id="${bookId}"]`);
+    if (!$book.length) return;
 
-    const title = book.dataset.title || "Book";
-    const author = book.dataset.author || "";
-    const currentShelf = book.dataset.shelf || book.closest(".shelf")?.dataset.shelf || "current";
+    const title = $book.data('title') || "Book";
+    const author = $book.data('author') || "";
+    const currentShelf = $book.data('shelf') || $book.closest(".shelf").data('shelf') || "current";
 
-    mTitle.textContent = title;
-    mMeta.textContent = author ? `by ${author}` : "Move this book to another shelf";
-    mShelf.value = currentShelf;
+    $mTitle.text(title);
+    $mMeta.text(author ? `by ${author}` : "Move this book to another shelf");
+    $mShelf.val(currentShelf);
+    $mToast.hide();
 
-    mToast.style.display = "none";
-    modal.classList.add("is-open");
-    modal.setAttribute("aria-hidden", "false");
+    $modal.fadeIn(300).addClass('is-open').attr('aria-hidden', 'false');
 
-    mSave.onclick = () => {
-      const newShelf = mShelf.value;
-      moveBookToShelf(book, newShelf);
+    $mSave.off('click').on('click', function() {
+      const newShelf = $mShelf.val();
+      moveBookToShelf($book[0], newShelf);
 
       if (shelfPanelState.open) {
         buildShelfPanelGrid(shelfPanelState.shelfKey);
-        filterPanelGrid(searchInput?.value || "");
+        filterPanelGrid($searchInput.val() || "");
       }
 
-      if (allView?.classList.contains("view--active")) {
+      if ($allView.hasClass('view--active')) {
         renderAllGrid(getAllBooksData());
       }
 
-      mToast.style.display = "block";
-      setTimeout(() => (mToast.style.display = "none"), 900);
-    };
+      $mToast.fadeIn(200).delay(700).fadeOut(200);
+    });
   }
 
   function closeModal() {
-    modal.classList.remove("is-open");
-    modal.setAttribute("aria-hidden", "true");
+    $modal.fadeOut(300).removeClass('is-open').attr('aria-hidden', 'true');
   }
 
-  $$("[data-close='1']", modal).forEach((x) => x.addEventListener("click", closeModal));
+  $modal.find("[data-close='1']").on('click', closeModal);
 
-  document.addEventListener("keydown", (e) => {
+  $(document).on('keydown', function(e) {
     if (e.key === "Escape") {
       closeModal();
       closeShelfPanel();
     }
   });
 
-  $$(".shelves .book").forEach((b) => b.addEventListener("click", () => openModal(b.dataset.id)));
+  $(".shelves .book").on('click', function() {
+    openModal($(this).data('id'));
+  });
 
-  // ---------------------------
-  // Init
-  // ---------------------------
-  const savedSearch = localStorage.getItem(LS.SEARCH) || "";
-  if (searchInput) searchInput.value = savedSearch;
+  $('.filter-btn').on('click', function() {
+    $('.filter-btn').removeClass('is-active');
+    $(this).addClass('is-active');
+    const filter = $(this).text().trim();
+    setLocalStorage(LS.SHOP_FILTER, filter);
+    filterShopBooks(filter);
+  });
 
-  const initialPage = localStorage.getItem(LS.ACTIVE_PAGE) || "library";
-  setActivePage(initialPage);
-
-  const initialTab = localStorage.getItem(LS.ACTIVE_TAB) || "shelves";
-  if (initialPage === "library" && initialTab === "all") {
-    renderAllGrid(getAllBooksData());
+  function filterShopBooks(filter) {
+    if (filter === 'All') {
+      $('.shop-book').fadeIn(300);
+      return;
+    }
+    
+    $('.shop-book').each(function() {
+      $(this).fadeIn(300);
+    });
   }
 
-  if (initialPage === "library") applySearch(savedSearch);
+  $('.shop-book__btn').on('click', function(e) {
+    e.stopPropagation();
+    const $btn = $(this);
+    const $book = $btn.closest('.shop-book');
+    const title = $book.find('.shop-book__title').text();
+    
+    $btn.text('Added!').prop('disabled', true);
+    
+    const favorites = getLocalStorage(LS.FAVORITES, []);
+    if (!favorites.includes(title)) {
+      favorites.push(title);
+      setLocalStorage(LS.FAVORITES, favorites);
+    }
+    
+    setTimeout(() => {
+      $btn.text('Add to Library').prop('disabled', false);
+    }, 2000);
+  });
+
+  // ===================== PROFILE SETTINGS =====================
+  const profileSettings = getLocalStorage(LS.PROFILE_SETTINGS, {
+    notifications: true,
+    darkMode: false,
+    readingReminders: true
+  });
+
+  $('.setting-toggle input').each(function() {
+    const $toggle = $(this);
+    const setting = $toggle.closest('.setting-item').find('.setting-item__label').text().toLowerCase().replace(/\s+/g, '');
+    const key = setting === 'notifications' ? 'notifications' : 
+                setting === 'darkmode' ? 'darkMode' : 'readingReminders';
+    $toggle.prop('checked', profileSettings[key] || false);
+  });
+
+  $('.setting-toggle input').on('change', function() {
+    const $toggle = $(this);
+    const $item = $toggle.closest('.setting-item');
+    const setting = $item.find('.setting-item__label').text().toLowerCase().replace(/\s+/g, '');
+    const key = setting === 'notifications' ? 'notifications' : 
+                setting === 'darkmode' ? 'darkMode' : 'readingReminders';
+    
+    profileSettings[key] = $toggle.is(':checked');
+    setLocalStorage(LS.PROFILE_SETTINGS, profileSettings);
+  });
+
+  // ===================== READING STATS =====================
+  function updateReadingStats() {
+    const stats = getLocalStorage(LS.READING_STATS, {
+      totalBooks: 15,
+      readingNow: 3,
+      finished: 6,
+      dayStreak: 12
+    });
+
+    $('.stat-card').each(function() {
+      const $card = $(this);
+      const icon = $card.find('.stat-card__icon').text();
+      let value = 0;
+      
+      if (icon.includes('📚')) value = stats.totalBooks;
+      else if (icon.includes('📖')) value = stats.readingNow;
+      else if (icon.includes('✅')) value = stats.finished;
+      else if (icon.includes('🔥')) value = stats.dayStreak;
+      
+      $card.find('.stat-card__value').text(value);
+    });
+  }
+
+  // ===================== INITIALIZATION =====================
+  const initialPage = getLocalStorage(LS.ACTIVE_PAGE, "home");
+  
+  // Скрываем все views по умолчанию
+  $views.hide().removeClass('view--active');
+  
+  setActivePage(initialPage);
+
+  // XXX Сохранение всех данных в Local Storage при любых изменениях
+  console.log('Local Storage initialized:', {
+    activePage: getLocalStorage(LS.ACTIVE_PAGE),
+    activeTab: getLocalStorage(LS.ACTIVE_TAB),
+    search: getLocalStorage(LS.SEARCH),
+    sort: getLocalStorage(LS.SORT),
+    shelvesMap: getLocalStorage(LS.SHELVES_MAP),
+    shopFilter: getLocalStorage(LS.SHOP_FILTER),
+    profileSettings: getLocalStorage(LS.PROFILE_SETTINGS),
+    readingStats: getLocalStorage(LS.READING_STATS),
+    favorites: getLocalStorage(LS.FAVORITES)
+  });
+
+  // Initialize animations and parallax
+  initAnimations();
+  initParallax();
+
+  // Smooth scroll for anchor links
+  $('a[href^="#"]').on('click', function(e) {
+    const target = $(this.getAttribute('href'));
+    if (target.length) {
+      e.preventDefault();
+      $('html, body').animate({
+        scrollTop: target.offset().top - 20
+      }, 600);
+    }
+  });
+
+  // Loading animation for images
+  $('img').on('load', function() {
+    $(this).addClass('loaded');
+  }).each(function() {
+    if (this.complete) {
+      $(this).addClass('loaded');
+    }
+  });
+
+  // Add ripple effect to buttons
+  $('.modal__btn, .shop-book__btn, .filter-btn, .tab, .setting-toggle').on('click', function(e) {
+    const $btn = $(this);
+    const ripple = $('<span>').addClass('ripple');
+    const rect = this.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = e.clientX - rect.left - size / 2;
+    const y = e.clientY - rect.top - size / 2;
+    
+    ripple.css({
+      width: size,
+      height: size,
+      left: x,
+      top: y
+    });
+    
+    $btn.append(ripple);
+    
+    setTimeout(() => {
+      ripple.remove();
+    }, 600);
+  });
+
+  // Keyboard navigation improvements
+  $('.menu__item, .tab, .filter-btn').on('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      $(this).click();
+    }
+  });
+
+  // Focus visible for accessibility
+  $('a, button, input, select').on('focus', function() {
+    $(this).addClass('focus-visible');
+  }).on('blur', function() {
+    $(this).removeClass('focus-visible');
+  });
 });
