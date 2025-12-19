@@ -304,7 +304,7 @@
             </div>
 
             <div class="shop-grid">
-              <div class="shop-book">
+              <div class="shop-book" data-genre="Fiction">
                 <div class="shop-book__cover">
                   <img src="sevenhusbands.jpg" alt="The Seven Husbands of Evelyn Hugo" />
                 </div>
@@ -318,7 +318,7 @@
                   <button class="shop-book__btn">Add to Library</button>
                 </div>
               </div>
-              <div class="shop-book">
+              <div class="shop-book" data-genre="Sci-Fi">
                 <div class="shop-book__cover">
                   <img src="hailmary.jpg" alt="Project Hail Mary" />
                 </div>
@@ -332,7 +332,7 @@
                   <button class="shop-book__btn">Add to Library</button>
                 </div>
               </div>
-              <div class="shop-book">
+              <div class="shop-book" data-genre="Fiction">
                 <div class="shop-book__cover">
                   <img src="midnight.jpg" alt="The Midnight Library" />
                 </div>
@@ -346,7 +346,7 @@
                   <button class="shop-book__btn">Add to Library</button>
                 </div>
               </div>
-              <div class="shop-book">
+              <div class="shop-book" data-genre="Sci-Fi">
                 <div class="shop-book__cover">
                   <img src="kazuoishi.jpg" alt="Klara and the Sun" />
                 </div>
@@ -360,7 +360,7 @@
                   <button class="shop-book__btn">Add to Library</button>
                 </div>
               </div>
-              <div class="shop-book">
+              <div class="shop-book" data-genre="Non-Fiction">
                 <div class="shop-book__cover">
                   <img src="psychology.jpg" alt="The Psychology of Money" />
                 </div>
@@ -374,7 +374,7 @@
                   <button class="shop-book__btn">Add to Library</button>
                 </div>
               </div>
-              <div class="shop-book">
+              <div class="shop-book" data-genre="Non-Fiction">
                 <div class="shop-book__cover">
                   <img src="thinkingfast.jpg" alt="Thinking, Fast and Slow" />
                 </div>
@@ -602,6 +602,9 @@
           <option value="finished">Finished</option>
         </select>
         <button class="modal__btn" id="mSave">Save</button>
+      </div>
+      <div class="modal__row" style="margin-top: 12px;">
+        <button class="modal__btn modal__btn--danger" id="mRemove" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">Remove from Library</button>
       </div>
       <div class="toast" id="mToast">Saved!</div>
     </div>

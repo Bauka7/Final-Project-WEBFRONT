@@ -79,7 +79,8 @@ if (!checkAuth()) {
     PROFILE_SETTINGS: "readowl.profileSettings",
     READING_STATS: "readowl.readingStats",
     FAVORITES: "readowl.favorites",
-    RECENT_VIEWED: "readowl.recentViewed"
+    RECENT_VIEWED: "readowl.recentViewed",
+    LIBRARY_BOOKS: "readowl.libraryBooks"
   };
 
   const norm = (s) => (s || "").toLowerCase().trim();
@@ -100,6 +101,7 @@ if (!checkAuth()) {
   const $mMeta = $("#mMeta");
   const $mShelf = $("#mShelf");
   const $mSave = $("#mSave");
+  const $mRemove = $("#mRemove");
   const $mToast = $("#mToast");
   const $menuLinks = $(".menu__item");
   const $profileBtn = $(".profile");
@@ -212,10 +214,19 @@ if (!checkAuth()) {
     const target = shelfContainers[shelfKey];
     if (!target || !target.length) return;
 
+    const bookId = $book.data('id');
     target.append($book);
     $book.attr('data-shelf', shelfKey);
-    savedMap[$book.data('id')] = shelfKey;
+    savedMap[bookId] = shelfKey;
     saveShelfMap();
+    
+    // Update library books data
+    const libraryBooks = getLocalStorage(LS.LIBRARY_BOOKS, []);
+    const bookIndex = libraryBooks.findIndex(b => b.id === bookId);
+    if (bookIndex !== -1) {
+      libraryBooks[bookIndex].shelf = shelfKey;
+      setLocalStorage(LS.LIBRARY_BOOKS, libraryBooks);
+    }
     
     $book.css({
       transform: 'scale(0.8)',
@@ -225,6 +236,10 @@ if (!checkAuth()) {
     }, 300).css('transform', 'scale(1)');
   }
 
+  // Restore library books from localStorage first
+  restoreLibraryBooks();
+
+  // Then restore shelf positions for existing books
   $.each(savedMap, function(bookId, shelfKey) {
     const $book = $(`.book[data-id="${bookId}"]`);
     const target = shelfContainers[shelfKey];
@@ -292,6 +307,18 @@ if (!checkAuth()) {
       
       if (pageKey === 'home') {
         updateReadingStats();
+      }
+      
+      if (pageKey === 'shop') {
+        // Restore saved filter
+        const savedFilter = getLocalStorage(LS.SHOP_FILTER, 'All');
+        $('.filter-btn').removeClass('is-active');
+        $('.filter-btn').each(function() {
+          if ($(this).text().trim() === savedFilter) {
+            $(this).addClass('is-active');
+          }
+        });
+        filterShopBooks(savedFilter);
       }
     }
   }
@@ -599,6 +626,57 @@ if (!checkAuth()) {
     openShelfPanel(shelfKey);
   });
 
+  // Function to remove book from library
+  function removeBookFromLibrary(bookId) {
+    const $book = $(`.shelves .book[data-id="${bookId}"]`);
+    if (!$book.length) return false;
+
+    // Remove from DOM with animation
+    $book.fadeOut(300, function() {
+      $book.remove();
+    });
+
+    // Remove from savedMap
+    delete savedMap[bookId];
+    saveShelfMap();
+
+    // Remove from library books
+    const libraryBooks = getLocalStorage(LS.LIBRARY_BOOKS, []);
+    const filteredBooks = libraryBooks.filter(b => b.id !== bookId);
+    setLocalStorage(LS.LIBRARY_BOOKS, filteredBooks);
+
+    // Update reading stats
+    const stats = getLocalStorage(LS.READING_STATS, {
+      totalBooks: 15,
+      readingNow: 3,
+      finished: 6,
+      dayStreak: 12
+    });
+    if (stats.totalBooks > 0) {
+      stats.totalBooks = Math.max(0, stats.totalBooks - 1);
+    }
+    const shelf = $book.data('shelf') || 'current';
+    if (shelf === 'current' && stats.readingNow > 0) {
+      stats.readingNow = Math.max(0, stats.readingNow - 1);
+    } else if (shelf === 'finished' && stats.finished > 0) {
+      stats.finished = Math.max(0, stats.finished - 1);
+    }
+    setLocalStorage(LS.READING_STATS, stats);
+    updateReadingStats();
+
+    // Update views if needed
+    if (shelfPanelState.open) {
+      buildShelfPanelGrid(shelfPanelState.shelfKey);
+      filterPanelGrid($searchInput.val() || "");
+    }
+
+    if ($allView.hasClass('view--active')) {
+      renderAllGrid(getAllBooksData());
+    }
+
+    return true;
+  }
+
   function openModal(bookId) {
     const $book = $(`.shelves .book[data-id="${bookId}"]`);
     if (!$book.length) return;
@@ -611,6 +689,15 @@ if (!checkAuth()) {
     $mMeta.text(author ? `by ${author}` : "Move this book to another shelf");
     $mShelf.val(currentShelf);
     $mToast.hide();
+
+    // Show save button and shelf select
+    $mSave.show();
+    $mShelf.show();
+
+    // Show remove button only for dynamically added books (check if in library books)
+    const libraryBooks = getLocalStorage(LS.LIBRARY_BOOKS, []);
+    const isAddedBook = libraryBooks.some(b => b.id === bookId);
+    $mRemove.toggle(isAddedBook);
 
     $modal.fadeIn(300).addClass('is-open').attr('aria-hidden', 'false');
 
@@ -627,7 +714,17 @@ if (!checkAuth()) {
         renderAllGrid(getAllBooksData());
       }
 
-      $mToast.fadeIn(200).delay(700).fadeOut(200);
+      $mToast.text('Saved!').fadeIn(200).delay(700).fadeOut(200);
+    });
+
+    $mRemove.off('click').on('click', function() {
+      if (confirm(`Are you sure you want to remove "${title}" from your library?`)) {
+        const removed = removeBookFromLibrary(bookId);
+        if (removed) {
+          closeModal();
+          $mToast.text('Removed from library!').fadeIn(200).delay(1500).fadeOut(200);
+        }
+      }
     });
   }
 
@@ -663,73 +760,204 @@ if (!checkAuth()) {
     }
     
     $('.shop-book').each(function() {
-      $(this).fadeIn(300);
+      const $book = $(this);
+      const bookGenre = $book.attr('data-genre') || '';
+      
+      if (bookGenre === filter) {
+        $book.fadeIn(300);
+      } else {
+        $book.fadeOut(300);
+      }
     });
+  }
+
+  // Function to create book element
+  function createBookElement(bookData) {
+    const { id, title, author, coverSrc, shelf } = bookData;
+    
+    const $bookElement = $('<a>')
+      .addClass('book')
+      .attr('href', `book.html?id=${id}`)
+      .attr('data-id', id)
+      .attr('data-title', title)
+      .attr('data-author', author)
+      .attr('data-shelf', shelf || 'current')
+      .attr('title', `${title} — ${author}`);
+    
+    const $bookImg = $('<img>')
+      .addClass('book__img')
+      .attr('loading', 'lazy')
+      .attr('alt', `${title} cover`)
+      .attr('src', coverSrc || '');
+    
+    $bookElement.append($bookImg);
+    
+    // Add click handler for modal
+    $bookElement.on('click', function(e) {
+      e.preventDefault();
+      openModal(id);
+    });
+    
+    return $bookElement;
+  }
+
+  // Function to add book to library
+  function addBookToLibrary(title, author, coverSrc, shelf = 'current') {
+    // Check if book already exists in library
+    const existingBook = $(`.shelves .book[data-title="${title}"]`);
+    if (existingBook.length > 0) {
+      return false; // Book already in library
+    }
+    
+    // Generate unique ID for the book
+    const bookId = 'b' + Date.now() + Math.random().toString(36).substr(2, 9);
+    
+    // Create book element
+    const $bookElement = createBookElement({
+      id: bookId,
+      title: title,
+      author: author,
+      coverSrc: coverSrc,
+      shelf: shelf
+    });
+    
+    // Add to specified shelf
+    const $shelfContainer = shelfContainers[shelf];
+    if ($shelfContainer && $shelfContainer.length) {
+      $bookElement.css({
+        transform: 'scale(0.8)',
+        opacity: 0
+      });
+      
+      $shelfContainer.append($bookElement);
+      
+      // Animate in
+      $bookElement.animate({
+        opacity: 1
+      }, 300, function() {
+        $bookElement.css('transform', 'scale(1)');
+      });
+      
+      // Save to localStorage
+      savedMap[bookId] = shelf;
+      saveShelfMap();
+      
+      // Save full book data
+      const libraryBooks = getLocalStorage(LS.LIBRARY_BOOKS, []);
+      libraryBooks.push({
+        id: bookId,
+        title: title,
+        author: author,
+        coverSrc: coverSrc,
+        shelf: shelf
+      });
+      setLocalStorage(LS.LIBRARY_BOOKS, libraryBooks);
+      
+      return true;
+    }
+    
+    return false;
+  }
+
+  // Function to restore library books from localStorage
+  function restoreLibraryBooks() {
+    const libraryBooks = getLocalStorage(LS.LIBRARY_BOOKS, []);
+    
+    libraryBooks.forEach(function(bookData) {
+      // Check if book element already exists by ID
+      const existingBookById = $(`.shelves .book[data-id="${bookData.id}"]`);
+      
+      // Also check by title to avoid duplicates
+      const existingBookByTitle = $(`.shelves .book[data-title="${bookData.title}"]`);
+      
+      if (existingBookById.length > 0) {
+        // Book exists by ID, just ensure it's in the right shelf
+        const $book = existingBookById;
+        const targetShelf = bookData.shelf || 'current';
+        const $targetContainer = shelfContainers[targetShelf];
+        
+        if ($targetContainer && $targetContainer.length) {
+          $book.attr('data-shelf', targetShelf);
+          $targetContainer.append($book);
+        }
+        savedMap[bookData.id] = bookData.shelf || 'current';
+      } else if (existingBookByTitle.length === 0) {
+        // Book doesn't exist, create it
+        const $bookElement = createBookElement(bookData);
+        const $shelfContainer = shelfContainers[bookData.shelf || 'current'];
+        
+        if ($shelfContainer && $shelfContainer.length) {
+          $shelfContainer.append($bookElement);
+          savedMap[bookData.id] = bookData.shelf || 'current';
+        }
+      }
+    });
+    
+    saveShelfMap();
   }
 
   $('.shop-book__btn').on('click', function(e) {
     e.stopPropagation();
     const $btn = $(this);
     const $book = $btn.closest('.shop-book');
-    const title = $book.find('.shop-book__title').text();
+    const title = $book.find('.shop-book__title').text().trim();
+    const author = $book.find('.shop-book__author').text().trim();
+    const coverImg = $book.find('.shop-book__cover img');
+    const coverSrc = coverImg.length ? coverImg.attr('src') : '';
     
-    $btn.text('Added!').prop('disabled', true);
-    
-    const favorites = getLocalStorage(LS.FAVORITES, []);
-    if (!favorites.includes(title)) {
-      favorites.push(title);
-      setLocalStorage(LS.FAVORITES, favorites);
+    // Check if already added
+    const existingBook = $(`.shelves .book[data-title="${title}"]`);
+    if (existingBook.length > 0) {
+      $btn.text('Already in Library').prop('disabled', true);
+      setTimeout(() => {
+        $btn.text('Add to Library').prop('disabled', false);
+      }, 2000);
+      return;
     }
     
-    setTimeout(() => {
-      $btn.text('Add to Library').prop('disabled', false);
-    }, 2000);
+    // Add to library
+    const added = addBookToLibrary(title, author, coverSrc);
+    
+    if (added) {
+      $btn.text('Added!').prop('disabled', true);
+      
+      // Also add to favorites
+      const favorites = getLocalStorage(LS.FAVORITES, []);
+      if (!favorites.includes(title)) {
+        favorites.push(title);
+        setLocalStorage(LS.FAVORITES, favorites);
+      }
+      
+      // Update reading stats
+      const stats = getLocalStorage(LS.READING_STATS, {
+        totalBooks: 15,
+        readingNow: 3,
+        finished: 6,
+        dayStreak: 12
+      });
+      stats.totalBooks = (stats.totalBooks || 15) + 1;
+      stats.readingNow = (stats.readingNow || 3) + 1;
+      setLocalStorage(LS.READING_STATS, stats);
+      updateReadingStats();
+      
+      setTimeout(() => {
+        $btn.text('Add to Library').prop('disabled', false);
+      }, 2000);
+    } else {
+      $btn.text('Error adding book').prop('disabled', true);
+      setTimeout(() => {
+        $btn.text('Add to Library').prop('disabled', false);
+      }, 2000);
+    }
   });
 
   // ===================== PROFILE SETTINGS =====================
-    const profileSettings = getLocalStorage(LS.PROFILE_SETTINGS, {
+  const profileSettings = getLocalStorage(LS.PROFILE_SETTINGS, {
     notifications: true,
-    darkMode: false, // Добавляем darkMode в настройки по умолчанию
+    darkMode: false,
     readingReminders: true
   });
 
-  // Функция для применения темы
-  function applyTheme() {
-    if (profileSettings.darkMode) {
-      $('body').addClass('dark-mode');
-    } else {
-      $('body').removeClass('dark-mode');
-    }
-  }
-
-  // Применяем тему при загрузке страницы
-  applyTheme();
-
-  // Обновляем обработчик для toggle
-  $('.setting-toggle input').each(function() {
-    const $toggle = $(this);
-    const setting = $toggle.closest('.setting-item').find('.setting-item__label').text().toLowerCase().replace(/\s+/g, '');
-    const key = setting === 'notifications' ? 'notifications' : 
-                setting === 'darkmode' ? 'darkMode' : 'readingReminders';
-    $toggle.prop('checked', profileSettings[key] || false);
-  });
-
-  $('.setting-toggle input').on('change', function() {
-    const $toggle = $(this);
-    const $item = $toggle.closest('.setting-item');
-    const setting = $item.find('.setting-item__label').text().toLowerCase().replace(/\s+/g, '');
-    const key = setting === 'notifications' ? 'notifications' : 
-                setting === 'darkmode' ? 'darkMode' : 'readingReminders';
-    
-    profileSettings[key] = $toggle.is(':checked');
-    setLocalStorage(LS.PROFILE_SETTINGS, profileSettings);
-    
-    // Если изменили dark mode, применяем тему
-    if (key === 'darkMode') {
-      applyTheme();
-    }
-  });
-
   $('.setting-toggle input').each(function() {
     const $toggle = $(this);
     const setting = $toggle.closest('.setting-item').find('.setting-item__label').text().toLowerCase().replace(/\s+/g, '');
@@ -748,8 +976,6 @@ if (!checkAuth()) {
     profileSettings[key] = $toggle.is(':checked');
     setLocalStorage(LS.PROFILE_SETTINGS, profileSettings);
   });
-
-  
 
   // ===================== READING STATS =====================
   function updateReadingStats() {
@@ -940,5 +1166,5 @@ if (!checkAuth()) {
     window.location.href = 'login.html';
   });
   
-  setTimeout(applyTheme, 100);
+  // ===================== END LOGOUT FUNCTIONALITY =====================
 });
