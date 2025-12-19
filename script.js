@@ -1,6 +1,91 @@
 $(document).ready(function() {
   'use strict';
 
+  // Check authentication
+function checkAuth() {
+  const LS = {
+    CURRENT_USER: "readowl.currentUser",
+    USERS: "readowl.users"
+  };
+
+  function getLocalStorage(key, defaultValue = null) {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  }
+
+  const currentUser = getLocalStorage(LS.CURRENT_USER);
+  
+  if (!currentUser) {
+    // Not logged in, redirect to login
+    if (!window.location.pathname.includes('login.html') && 
+        !window.location.pathname.includes('register.html')) {
+      window.location.href = 'login.html';
+      return false;
+    }
+  } else {
+    // Update profile with current user
+    updateUserProfile(currentUser);
+  }
+  
+  return true;
+}
+
+// Update profile with user data
+function updateUserProfile(user) {
+  // Update profile button
+  $('.profile__name').text(user.firstName);
+  $('.profile__avatar').text(user.avatar);
+  
+  // Update mini profile
+  $('.mini-profile__avatar').text(user.avatar);
+  
+  // Update profile page
+  $('.profile-header__name').text(user.firstName + ' ' + user.lastName);
+  $('.profile-header__email').text(user.email);
+  $('.profile-header__avatar').text(user.avatar);
+
+  updateHomeWelcomeMessage(user.firstName);
+}
+
+function updateHomeWelcomeMessage(firstName) {
+    // Update the welcome title
+    $('.home-hero__title').text(`Welcome back, ${firstName}!`);
+  }
+
+// Add logout function
+function initLogout() {
+  const LS = {
+    CURRENT_USER: "readowl.currentUser"
+  };
+
+  // Add logout button to profile page
+  const $logoutBtn = $(`
+    <button class="auth-btn logout-btn" style="margin-top: 20px;">
+      Sign Out
+    </button>
+  `);
+  
+  $('.profile-sections').append($logoutBtn);
+  
+  $logoutBtn.on('click', function() {
+    localStorage.removeItem(LS.CURRENT_USER);
+    window.location.href = 'login.html';
+  });
+}
+
+// Call checkAuth at the beginning
+if (!checkAuth()) {
+  return; // Stop execution if not authenticated
+}
+
+// Then continue with the rest of your existing code...
+// Add this line at the very end of the document ready function:
+
+
   const LS = {
     SHELVES_MAP: "readowl.shelvesMap",
     ACTIVE_TAB: "readowl.activeTab",
@@ -51,6 +136,7 @@ $(document).ready(function() {
       return {};
     }
   })();
+  
 
   function saveShelfMap() {
     localStorage.setItem(LS.SHELVES_MAP, JSON.stringify(savedMap));
@@ -692,6 +778,8 @@ $(document).ready(function() {
   initAnimations();
   initParallax();
 
+  initLogout();
+
   // Smooth scroll for anchor links
   $('a[href^="#"]').on('click', function(e) {
     const target = $(this.getAttribute('href'));
@@ -749,4 +837,110 @@ $(document).ready(function() {
   }).on('blur', function() {
     $(this).removeClass('focus-visible');
   });
+  
+    // ===================== LOGOUT FUNCTIONALITY =====================
+  
+  // Function to handle logout
+  function handleLogout() {
+    if (confirm('Are you sure you want to logout?')) {
+      // Clear user session
+      localStorage.removeItem('readowl.currentUser');
+      
+      // Optional: Clear other user-specific data
+      // const keys = Object.keys(localStorage);
+      // keys.forEach(key => {
+      //   if (key.startsWith('readowl.user_')) {
+      //     localStorage.removeItem(key);
+      //   }
+      // });
+      
+      // Redirect to login
+      window.location.href = 'login.html';
+    }
+  }
+  
+  // Add logout button to profile header (if it doesn't exist)
+  function setupLogoutButton() {
+    // Check if we're on profile page
+    if ($('#view-profile').is(':visible')) {
+      // Add logout button to header
+      if ($('.profile-header__logout').length === 0) {
+        const $logoutBtn = $('<button class="profile-header__logout">Sign Out</button>');
+        $('.profile-header__edit').after($logoutBtn);
+        
+        // Style the button
+        $logoutBtn.css({
+          'margin-top': '12px',
+          'border': '1px solid rgba(239, 68, 68, 0.3)',
+          'background': 'rgba(239, 68, 68, 0.1)',
+          'color': '#ef4444',
+          'border-radius': '12px',
+          'padding': '10px 16px',
+          'font-size': '13px',
+          'font-weight': '600',
+          'cursor': 'pointer',
+          'transition': 'all .25s ease',
+          'width': '100%'
+        });
+        
+        // Add click handler
+        $logoutBtn.on('click', handleLogout);
+        
+        // Add hover effect
+        $logoutBtn.hover(
+          function() {
+            $(this).css({
+              'background': 'rgba(239, 68, 68, 0.2)',
+              'transform': 'translateY(-1px)'
+            });
+          },
+          function() {
+            $(this).css({
+              'background': 'rgba(239, 68, 68, 0.1)',
+              'transform': 'translateY(0)'
+            });
+          }
+        );
+      }
+      
+      // Also add logout to settings section
+      if ($('.settings-list').length && $('.logout-btn').length === 0) {
+        const $logoutItem = $(`
+          <div class="setting-item">
+            <span class="setting-item__label" style="color: #ef4444;">Sign Out</span>
+            <button class="logout-btn" style="
+              color: #ef4444;
+              font-weight: 600;
+              border: none;
+              background: none;
+              cursor: pointer;
+              padding: 8px 16px;
+              border-radius: 8px;
+            ">Logout</button>
+          </div>
+        `);
+        
+        $('.settings-list').append($logoutItem);
+        $logoutItem.find('.logout-btn').on('click', handleLogout);
+        
+        // Add hover effect
+        $logoutItem.find('.logout-btn').hover(
+          function() { $(this).css('background', 'rgba(239, 68, 68, 0.1)'); },
+          function() { $(this).css('background', 'none'); }
+        );
+      }
+    }
+  }
+  
+  // Setup logout when profile page loads
+  $(document).on('click', '.menu__item[data-page="profile"]', function() {
+    setTimeout(setupLogoutButton, 350); // Wait for fadeIn animation
+  });
+  
+  // Also setup if profile page is already active
+  if ($('#view-profile').hasClass('view--active')) {
+    setupLogoutButton();
+  }
+  
+  // ===================== END LOGOUT FUNCTIONALITY =====================
 });
