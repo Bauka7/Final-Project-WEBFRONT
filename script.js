@@ -57,25 +57,7 @@ function updateHomeWelcomeMessage(firstName) {
   }
 
 // Add logout function
-function initLogout() {
-  const LS = {
-    CURRENT_USER: "readowl.currentUser"
-  };
 
-  // Add logout button to profile page
-  const $logoutBtn = $(`
-    <button class="auth-btn logout-btn" style="margin-top: 20px;">
-      Sign Out
-    </button>
-  `);
-  
-  $('.profile-sections').append($logoutBtn);
-  
-  $logoutBtn.on('click', function() {
-    localStorage.removeItem(LS.CURRENT_USER);
-    window.location.href = 'login.html';
-  });
-}
 
 // Call checkAuth at the beginning
 if (!checkAuth()) {
@@ -778,7 +760,6 @@ if (!checkAuth()) {
   initAnimations();
   initParallax();
 
-  initLogout();
 
   // Smooth scroll for anchor links
   $('a[href^="#"]').on('click', function(e) {
@@ -903,32 +884,6 @@ if (!checkAuth()) {
         );
       }
       
-      // Also add logout to settings section
-      if ($('.settings-list').length && $('.logout-btn').length === 0) {
-        const $logoutItem = $(`
-          <div class="setting-item">
-            <span class="setting-item__label" style="color: #ef4444;">Sign Out</span>
-            <button class="logout-btn" style="
-              color: #ef4444;
-              font-weight: 600;
-              border: none;
-              background: none;
-              cursor: pointer;
-              padding: 8px 16px;
-              border-radius: 8px;
-            ">Logout</button>
-          </div>
-        `);
-        
-        $('.settings-list').append($logoutItem);
-        $logoutItem.find('.logout-btn').on('click', handleLogout);
-        
-        // Add hover effect
-        $logoutItem.find('.logout-btn').hover(
-          function() { $(this).css('background', 'rgba(239, 68, 68, 0.1)'); },
-          function() { $(this).css('background', 'none'); }
-        );
-      }
     }
   }
   
@@ -941,6 +896,10 @@ if (!checkAuth()) {
   if ($('#view-profile').hasClass('view--active')) {
     setupLogoutButton();
   }
+  $('#logoutBtn').on('click', function () {
+    localStorage.removeItem('readowl.currentUser');
+    window.location.href = 'login.html';
+  });
   
   // ===================== END LOGOUT FUNCTIONALITY =====================
 });
