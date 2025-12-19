@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title id="page-title">ReadOwl – Book</title>
+  <link rel="stylesheet" href="bookstyle.css"/>
+</head>
+<body class="book-page">
+  <a class="book-page__back" href="index.html#view-shelves">‹ Back to library</a>
+
+  <main class="book-card">
+    <img class="book-card__cover" id="book-cover" alt="cover"/>
+
+    <div class="book-card__content">
+      <h1 class="book-card__title" id="book-title"></h1>
+      <p class="book-card__author" id="book-author"></p>
+      <p class="book-card__desc"  id="book-desc"></p>
+
+    <a class="book-card__read" id="book-read" href="reader.html">Start reading</a>
+    </div>
+  </main>
+
+  <script>
+    const books = {
+      b1: {
+        title: "Atomic Habits",
+        author: "James Clear",
+        cover: "atomichabits.jpg",
+        desc: "Tiny changes, remarkable results. A supremely practical guide on how to build good habits and break bad ones.",
+        read: "#"
+      },
+      b2: {
+        title: "Dune",
+        author: "Frank Herbert",
+        cover: "dune.jpg",
+        desc: "A sweeping science-fiction epic of politics, religion, and giant sandworms on the desert planet Arrakis.",
+        read: "#"
+      },
+      b3: {
+        title: "Clean Code",
+        author: "Robert C. Martin",
+        cover: "cleancode.jpg",
+        desc: "Agile software craftsmanship: how to write code that is readable, maintainable, and elegant.",
+        read: "#"
+      }
+    };
+
+    const id = new URLSearchParams(location.search).get("id");
+    const data = books[id] || books.b1;
+
+    document.getElementById("page-title").textContent = `ReadOwl – ${data.title}`;
+    document.getElementById("book-cover").src = data.cover;
+    document.getElementById("book-title").textContent = data.title;
+    document.getElementById("book-author").textContent = "by " + data.author;
+    document.getElementById("book-desc").textContent = data.desc;
+    document.getElementById("book-read").href = data.read;
+
+    document.getElementById("book-read").href = "reader.html?id=" + id;
+  </script>
+</body>
+</html>

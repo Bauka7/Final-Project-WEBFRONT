@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title id="page-title">ReadOwl – Reader</title>
+  <link rel="stylesheet" href="readerstyle.css"/>
+</head>
+<body class="reader-page">
+  <header class="reader-bar">
+    <a class="reader-bar__back" href="book.html?id=" id="back-link">‹ Back</a>
+    <span class="reader-bar__title" id="book-name"></span>
+  </header>
+
+  <main class="reader-main">
+    <embed id="pdf-viewer" src="" type="application/pdf" class="reader-embed"/>
+  </main>
+
+  <script>
+    const map = {
+      b1: { file: "atomic-habits.pdf",  title: "Atomic Habits" },
+      b2: { file: "dune.pdf",           title: "Dune" },
+      b3: { file: "clean-code.pdf",     title: "Clean Code" }
+    };
+
+    const id  = new URLSearchParams(location.search).get("id");
+    const obj = map[id] || map.b1;
+
+    document.getElementById("page-title").textContent = `ReadOwl – ${obj.title}`;
+    document.getElementById("book-name").textContent    = obj.title;
+    document.getElementById("back-link").href          += id;
+    document.getElementById("pdf-viewer").src          = obj.file;
+  </script>
+</body>
+</html>

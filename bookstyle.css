@@ -1,0 +1,86 @@
+/* ========== BOOK PAGE ========== */
+.book-page{
+  min-height:100vh;
+  background:#f7f9fc;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:3rem 1.5rem;
+}
+
+.book-page__back{
+  position:absolute;
+  top:2rem;
+  left:2rem;
+  font-size:.9rem;
+  color:#555;
+  text-decoration:none;
+  transition:color .2s;
+}
+.book-page__back:hover{color:#000}
+
+.book-card{
+  display:flex;
+  gap:2.5rem;
+  max-width:900px;
+  width:100%;
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.06);
+  padding:2.5rem;
+}
+
+.book-card__cover{
+  width:200px;
+  height:300px;
+  object-fit:cover;
+  border-radius:8px;
+  flex-shrink:0;
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+
+.book-card__content{
+  display:flex;
+  flex-direction:column;
+}
+
+.book-card__title{
+  font-size:2rem;
+  font-weight:700;
+  margin:0 0 .25rem;
+  color:#111;
+}
+
+.book-card__author{
+  font-size:1.1rem;
+  color:#666;
+  margin:0 0 1.5rem;
+}
+
+.book-card__desc{
+  font-size:1rem;
+  line-height:1.6;
+  color:#444;
+  margin:0 0 2rem;
+  flex-grow:1;
+}
+
+.book-card__read{
+  align-self:flex-start;
+  background:#111;
+  color:#fff;
+  padding:.9rem 2rem;
+  border-radius:6px;
+  font-weight:600;
+  text-decoration:none;
+  transition:background .25s;
+}
+.book-card__read:hover{background:#333}
+
+/* адаптив */
+@media(max-width:700px){
+  .book-card{flex-direction:column;align-items:center;text-align:center}
+  .book-card__cover{width:160px;height:240px}
+  .book-card__read{align-self:center}
+}

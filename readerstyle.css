@@ -1,0 +1,36 @@
+.reader-page{
+  margin:0;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  background:#111;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+
+.reader-bar{
+  flex:0 0 56px;
+  background:#1a1a1a;
+  color:#eee;
+  display:flex;
+  align-items:center;
+  padding:0 1.5rem;
+  gap:1rem;
+  font-size:1rem;
+}
+
+.reader-bar__back{
+  color:#bbb;
+  text-decoration:none;
+  font-size:1.2rem;
+  transition:color .2s;
+}
+.reader-bar__back:hover{color:#fff}
+
+.reader-bar__title{font-weight:600}
+
+.reader-main{flex:1;overflow:hidden}
+.reader-embed{
+  width:100%;
+  height:100%;
+  border:none;
+}
