@@ -687,10 +687,47 @@ if (!checkAuth()) {
   });
 
   // ===================== PROFILE SETTINGS =====================
-  const profileSettings = getLocalStorage(LS.PROFILE_SETTINGS, {
+    const profileSettings = getLocalStorage(LS.PROFILE_SETTINGS, {
     notifications: true,
-    darkMode: false,
+    darkMode: false, // Добавляем darkMode в настройки по умолчанию
     readingReminders: true
+  });
+
+  // Функция для применения темы
+  function applyTheme() {
+    if (profileSettings.darkMode) {
+      $('body').addClass('dark-mode');
+    } else {
+      $('body').removeClass('dark-mode');
+    }
+  }
+
+  // Применяем тему при загрузке страницы
+  applyTheme();
+
+  // Обновляем обработчик для toggle
+  $('.setting-toggle input').each(function() {
+    const $toggle = $(this);
+    const setting = $toggle.closest('.setting-item').find('.setting-item__label').text().toLowerCase().replace(/\s+/g, '');
+    const key = setting === 'notifications' ? 'notifications' : 
+                setting === 'darkmode' ? 'darkMode' : 'readingReminders';
+    $toggle.prop('checked', profileSettings[key] || false);
+  });
+
+  $('.setting-toggle input').on('change', function() {
+    const $toggle = $(this);
+    const $item = $toggle.closest('.setting-item');
+    const setting = $item.find('.setting-item__label').text().toLowerCase().replace(/\s+/g, '');
+    const key = setting === 'notifications' ? 'notifications' : 
+                setting === 'darkmode' ? 'darkMode' : 'readingReminders';
+    
+    profileSettings[key] = $toggle.is(':checked');
+    setLocalStorage(LS.PROFILE_SETTINGS, profileSettings);
+    
+    // Если изменили dark mode, применяем тему
+    if (key === 'darkMode') {
+      applyTheme();
+    }
   });
 
   $('.setting-toggle input').each(function() {
@@ -711,6 +748,8 @@ if (!checkAuth()) {
     profileSettings[key] = $toggle.is(':checked');
     setLocalStorage(LS.PROFILE_SETTINGS, profileSettings);
   });
+
+  
 
   // ===================== READING STATS =====================
   function updateReadingStats() {
@@ -901,5 +940,5 @@ if (!checkAuth()) {
     window.location.href = 'login.html';
   });
   
-  // ===================== END LOGOUT FUNCTIONALITY =====================
+  setTimeout(applyTheme, 100);
 });
