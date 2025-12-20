@@ -933,7 +933,7 @@ if (!checkAuth()) {
         totalBooks: 15,
         readingNow: 3,
         finished: 6,
-        dayStreak: 12
+                dayStreak: 12
       });
       stats.totalBooks = (stats.totalBooks || 15) + 1;
       stats.readingNow = (stats.readingNow || 3) + 1;
@@ -958,6 +958,10 @@ if (!checkAuth()) {
     readingReminders: true
   });
 
+  function applyDarkMode(isEnabled) {
+    $('body').toggleClass('dark-mode', Boolean(isEnabled));
+  }
+
   $('.setting-toggle input').each(function() {
     const $toggle = $(this);
     const setting = $toggle.closest('.setting-item').find('.setting-item__label').text().toLowerCase().replace(/\s+/g, '');
@@ -965,6 +969,8 @@ if (!checkAuth()) {
                 setting === 'darkmode' ? 'darkMode' : 'readingReminders';
     $toggle.prop('checked', profileSettings[key] || false);
   });
+
+  applyDarkMode(profileSettings.darkMode);
 
   $('.setting-toggle input').on('change', function() {
     const $toggle = $(this);
@@ -975,6 +981,10 @@ if (!checkAuth()) {
     
     profileSettings[key] = $toggle.is(':checked');
     setLocalStorage(LS.PROFILE_SETTINGS, profileSettings);
+
+    if (key === 'darkMode') {
+      applyDarkMode(profileSettings[key]);
+    }
   });
 
   // ===================== READING STATS =====================
@@ -999,7 +1009,6 @@ if (!checkAuth()) {
       $card.find('.stat-card__value').text(value);
     });
   }
-
   // ===================== INITIALIZATION =====================
   const initialPage = getLocalStorage(LS.ACTIVE_PAGE, "home");
   

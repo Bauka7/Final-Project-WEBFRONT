@@ -325,6 +325,21 @@ body.dark-mode {
   --border: rgba(255, 255, 255, 0.1);
   
   background: radial-gradient(ellipse at top, var(--bg1) 0%, var(--bg2) 50%, var(--bg3) 100%);
+    position: relative;
+}
+
+body.dark-mode::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 14, 20, 0.35);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page {
+  position: relative;
+  z-index: 1;
 }
 
 body.dark-mode .container {
