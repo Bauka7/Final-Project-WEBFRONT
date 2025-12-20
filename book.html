@@ -22,69 +22,134 @@
   </main>
 
   <script>
+    const catalog = {
+      "Atomic Habits": {
+        author: "James Clear",
+        cover: "books-images/atomichabits.jpg",
+        desc: "Tiny changes, remarkable results. A supremely practical guide on how to build good habits and break bad ones."
+      },
+      "Dune": {
+        author: "Frank Herbert",
+        cover: "books-images/dune.jpg",
+        desc: "A sweeping science-fiction epic of politics, religion, and giant sandworms on the desert planet Arrakis."
+      },
+      "Clean Code": {
+        author: "Robert C. Martin",
+        cover: "books-images/cleancode.jpg",
+        desc: "Agile software craftsmanship: how to write code that is readable, maintainable, and elegant."
+      },
+      "The Midnight Library": {
+        author: "Matt Haig",
+        cover: "books-images/midnight.jpg",
+        desc: "A woman discovers a library of alternate lives and must decide which path gives her the most meaning."
+      },
+      "Klara and the Sun": {
+        author: "Kazuo Ishiguro",
+        cover: "books-images/kazuoishi.jpg",
+        desc: "In a near-future world, an AI companion challenges what it means to be human and to love."
+      },
+      "The Psychology of Money": {
+        author: "Morgan Housel",
+        cover: "books-images/psychology.jpg",
+        desc: "Timeless lessons about money, behavior, and building wealth through better decisions."
+      },
+      "Thinking, Fast and Slow": {
+        author: "Daniel Kahneman",
+        cover: "books-images/thinkingfast.jpg",
+        desc: "A tour through the fast and slow systems of thinking that shape our choices every day."
+      },
+      "The Seven Husbands of Evelyn Hugo": {
+        author: "Taylor Jenkins Reid",
+        cover: "books-images/sevenhusbands.jpg",
+        desc: "A glamorous Hollywood icon opens up about her seven husbands, revealing a story of ambition, love, and reinvention."
+      },
+      "Project Hail Mary": {
+        author: "Andy Weir",
+        cover: "books-images/hailmary.jpg",
+        desc: "A lone astronaut wakes up on a space mission with humanity’s fate resting on his scientific ingenuity and grit."
+      }
+    };
+
     const books = {
       b1: {
         title: "Atomic Habits",
         author: "James Clear",
         cover: "books-images/atomichabits.jpg",
-        desc: "Tiny changes, remarkable results. A supremely practical guide on how to build good habits and break bad ones.",
-        read: "#"
+        desc: catalog["Atomic Habits"].desc
       },
       b2: {
         title: "Dune",
         author: "Frank Herbert",
         cover: "books-images/dune.jpg",
-        desc: "A sweeping science-fiction epic of politics, religion, and giant sandworms on the desert planet Arrakis.",
-        read: "#"
+        desc: catalog.Dune.desc
       },
-       b3: {
+      b3: {
         title: "Clean Code",
         author: "Robert C. Martin",
         cover: "books-images/cleancode.jpg",
-        desc: "Agile software craftsmanship: how to write code that is readable, maintainable, and elegant.",
-        read: "#"
+        desc: catalog["Clean Code"].desc
       },
       b4: {
         title: "The Midnight Library",
         author: "Matt Haig",
         cover: "books-images/midnight.jpg",
-        desc: "A novel about parallel lives and second chances when a woman explores all the lives she could have lived.",
-        read: "#"
+        desc: catalog["The Midnight Library"].desc
       },
       b5: {
+        title: "Klara and the Sun",
+        author: "Kazuo Ishiguro",
+        cover: "books-images/kazuoishi.jpg",
+        desc: catalog["Klara and the Sun"].desc
+      },
+      b6: {
         title: "The Psychology of Money",
         author: "Morgan Housel",
         cover: "books-images/psychology.jpg",
-        desc: "Timeless lessons on wealth, greed, and happiness with memorable short stories about money.",
-        read: "#"
-      },
-      b6: {
-        title: "The Seven Husbands of Evelyn Hugo",
-        author: "Taylor Jenkins Reid",
-        cover: "books-images/sevenhusbands.jpg",
-        desc: "A glamorous Hollywood legend reveals the story behind her seven husbands and one great love.",
-        read: "#"
+        desc: catalog["The Psychology of Money"].desc
       },
       b7: {
         title: "Thinking, Fast and Slow",
         author: "Daniel Kahneman",
         cover: "books-images/thinkingfast.jpg",
-        desc: "A tour of the mind’s two systems: fast intuition and slow deliberation, and how they shape our decisions.",
-        read: "#"
+        desc: catalog["Thinking, Fast and Slow"].desc
       }
     };
 
     const id = new URLSearchParams(location.search).get("id");
-    const data = books[id] || books.b1;
+
+    const storedBooks = (() => {
+      try {
+        return JSON.parse(localStorage.getItem("readowl.libraryBooks") || "[]");
+      } catch {
+        return [];
+      }
+    })();
+
+    const storedMatch = storedBooks.find((book) => book.id === id);
+    const fallbackData = storedMatch
+      ? {
+          title: storedMatch.title,
+          author: storedMatch.author,
+          cover: storedMatch.coverSrc,
+          desc: storedMatch.description
+        }
+      : books[id];
+
+    const catalogEntry = fallbackData && fallbackData.title ? catalog[fallbackData.title] : null;
+    const data = {
+      title: (fallbackData && fallbackData.title) || "Atomic Habits",
+      author: (fallbackData && fallbackData.author) || (catalogEntry && catalogEntry.author) || "James Clear",
+      cover: (fallbackData && fallbackData.cover) || (catalogEntry && catalogEntry.cover) || "books-images/atomichabits.jpg",
+      desc: (fallbackData && fallbackData.desc) || (catalogEntry && catalogEntry.desc) || catalog["Atomic Habits"].desc
+    };
 
     document.getElementById("page-title").textContent = `ReadOwl – ${data.title}`;
     document.getElementById("book-cover").src = data.cover;
     document.getElementById("book-title").textContent = data.title;
     document.getElementById("book-author").textContent = "by " + data.author;
     document.getElementById("book-desc").textContent = data.desc;
-    document.getElementById("book-read").href = data.read;
 
-    document.getElementById("book-read").href = "reader.html?id=" + id;
+    document.getElementById("book-read").href = "reader.html?id=" + encodeURIComponent(id || "b1");
   </script>
 </body>
 </html>

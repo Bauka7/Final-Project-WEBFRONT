@@ -18,6 +18,59 @@ $(document).ready(function() {
     LIBRARY_BOOKS: "readowl.libraryBooks"
   };
 
+  const BOOK_CATALOG = {
+    "Atomic Habits": {
+      author: "James Clear",
+      cover: "books-images/atomichabits.jpg",
+      description: "Tiny changes, remarkable results. A supremely practical guide on how to build good habits and break bad ones."
+    },
+    "Dune": {
+      author: "Frank Herbert",
+      cover: "books-images/dune.jpg",
+      description: "A sweeping science-fiction epic of politics, religion, and giant sandworms on the desert planet Arrakis."
+    },
+    "Clean Code": {
+      author: "Robert C. Martin",
+      cover: "books-images/cleancode.jpg",
+      description: "Agile software craftsmanship: how to write code that is readable, maintainable, and elegant."
+    },
+    "The Midnight Library": {
+      author: "Matt Haig",
+      cover: "books-images/midnight.jpg",
+      description: "A woman discovers a library of alternate lives and must decide which path gives her the most meaning."
+    },
+    "Klara and the Sun": {
+      author: "Kazuo Ishiguro",
+      cover: "books-images/kazuoishi.jpg",
+      description: "In a near-future world, an AI companion challenges what it means to be human and to love."
+    },
+    "The Psychology of Money": {
+      author: "Morgan Housel",
+      cover: "books-images/psychology.jpg",
+      description: "Timeless lessons about money, behavior, and building wealth through better decisions."
+    },
+    "Thinking, Fast and Slow": {
+      author: "Daniel Kahneman",
+      cover: "books-images/thinkingfast.jpg",
+      description: "A tour through the fast and slow systems of thinking that shape our choices every day."
+    },
+    "The Seven Husbands of Evelyn Hugo": {
+      author: "Taylor Jenkins Reid",
+      cover: "books-images/sevenhusbands.jpg",
+      description: "A glamorous Hollywood icon opens up about her seven husbands, revealing a story of ambition, love, and reinvention."
+    },
+    "Project Hail Mary": {
+      author: "Andy Weir",
+      cover: "books-images/hailmary.jpg",
+      description: "A lone astronaut wakes up on a space mission with humanity’s fate resting on his scientific ingenuity and grit."
+    }
+  };
+
+  function getCatalogEntry(title) {
+    return BOOK_CATALOG[title] || null;
+  }
+
+
   function getLocalStorage(key, defaultValue = null) {
     try {
       const item = localStorage.getItem(key);
@@ -760,7 +813,8 @@ $(document).ready(function() {
     }
   });
 
-  $(".shelves .book").on('click', function() {
+  $(document).on('click', '.shelves .book', function(e) {
+    e.preventDefault();
     openModal($(this).data('id'));
   });
 
@@ -811,23 +865,23 @@ $(document).ready(function() {
     
     $bookElement.append($bookImg);
     
-    // Add click handler for modal
-    $bookElement.on('click', function(e) {
-      e.preventDefault();
-      openModal(id);
-    });
+    
     
     return $bookElement;
   }
 
   // Function to add book to library
-  function addBookToLibrary(title, author, coverSrc, shelf = 'current') {
-    // Check if book already exists in library
+function addBookToLibrary(title, author, coverSrc, shelf = 'current', description = '') {
+      // Check if book already exists in library
     const existingBook = $(`.shelves .book[data-title="${title}"]`);
     if (existingBook.length > 0) {
       return false; // Book already in library
     }
     
+    const catalogEntry = getCatalogEntry(title);
+    const resolvedCover = coverSrc || (catalogEntry && catalogEntry.cover) || '';
+    const resolvedAuthor = author || (catalogEntry && catalogEntry.author) || '';
+    const resolvedDescription = description || (catalogEntry && catalogEntry.description) || '';
     // Generate unique ID for the book
     const bookId = 'b' + Date.now() + Math.random().toString(36).substr(2, 9);
     
@@ -835,8 +889,8 @@ $(document).ready(function() {
     const $bookElement = createBookElement({
       id: bookId,
       title: title,
-      author: author,
-      coverSrc: coverSrc,
+      author: resolvedAuthor,
+      coverSrc: resolvedCover,
       shelf: shelf
     });
     
@@ -883,6 +937,10 @@ $(document).ready(function() {
     const libraryBooks = getLocalStorage(LS.LIBRARY_BOOKS, []);
     
     libraryBooks.forEach(function(bookData) {
+      const catalogEntry = getCatalogEntry(bookData.title);
+      const resolvedCover = bookData.coverSrc || (catalogEntry && catalogEntry.cover) || '';
+      const resolvedAuthor = bookData.author || (catalogEntry && catalogEntry.author) || '';
+      const resolvedDescription = bookData.description || (catalogEntry && catalogEntry.description) || '';
       // Check if book element already exists by ID
       const existingBookById = $(`.shelves .book[data-id="${bookData.id}"]`);
       
@@ -897,12 +955,18 @@ $(document).ready(function() {
         
         if ($targetContainer && $targetContainer.length) {
           $book.attr('data-shelf', targetShelf);
+          $book.attr('data-author', resolvedAuthor);
           $targetContainer.append($book);
         }
         savedMap[bookData.id] = bookData.shelf || 'current';
       } else if (existingBookByTitle.length === 0) {
         // Book doesn't exist, create it
-        const $bookElement = createBookElement(bookData);
+        const $bookElement = createBookElement({
+          ...bookData,
+          author: resolvedAuthor,
+          coverSrc: resolvedCover,
+          description: resolvedDescription
+        });
         const $shelfContainer = shelfContainers[bookData.shelf || 'current'];
         
         if ($shelfContainer && $shelfContainer.length) {
@@ -923,6 +987,7 @@ $(document).ready(function() {
     const author = $book.find('.shop-book__author').text().trim();
     const coverImg = $book.find('.shop-book__cover img');
     const coverSrc = coverImg.length ? coverImg.attr('src') : '';
+    const description = $book.data('description') || '';
     
     // Check if already added
     const existingBook = $(`.shelves .book[data-title="${title}"]`);
@@ -935,8 +1000,7 @@ $(document).ready(function() {
     }
     
     // Add to library
-    const added = addBookToLibrary(title, author, coverSrc);
-    
+    const added = addBookToLibrary(title, author, coverSrc, 'current', description)    
     if (added) {
       $btn.text('Added!').prop('disabled', true);
       
@@ -970,7 +1034,8 @@ $(document).ready(function() {
     }
   });
 
-  $('.shop-book').on('click', function(e) {
+    
+    $('.shop-book').on('click', function(e) {
     if ($(e.target).closest('.shop-book__btn').length) {
       return;
     }
@@ -1129,4 +1194,3 @@ $(document).ready(function() {
     }
   });
 });
-  
