@@ -752,11 +752,7 @@ $(document).ready(function() {
     // Show save button and shelf select
     $mSave.show();
     $mShelf.show();
-
-    // Show remove button only for dynamically added books (check if in library books)
-    const libraryBooks = getLocalStorage(LS.LIBRARY_BOOKS, []);
-    const isAddedBook = libraryBooks.some(b => b.id === bookId);
-    $mRemove.toggle(isAddedBook);
+    $mRemove.show();
 
     $modal.fadeIn(300).addClass('is-open').attr('aria-hidden', 'false');
 
@@ -865,8 +861,6 @@ $(document).ready(function() {
     
     $bookElement.append($bookImg);
     
-    
-    
     return $bookElement;
   }
 
@@ -920,8 +914,9 @@ function addBookToLibrary(title, author, coverSrc, shelf = 'current', descriptio
       libraryBooks.push({
         id: bookId,
         title: title,
-        author: author,
-        coverSrc: coverSrc,
+        author: resolvedAuthor,
+        coverSrc: resolvedCover,
+        description: resolvedDescription,
         shelf: shelf
       });
       setLocalStorage(LS.LIBRARY_BOOKS, libraryBooks);

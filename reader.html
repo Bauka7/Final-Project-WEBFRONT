@@ -17,19 +17,34 @@
   </main>
 
   <script>
-    const map = {
-      b1: { file: "pdf-books/atomic-habits.pdf",  title: "Atomic Habits" },
-      b2: { file: "pdf-books/dune.pdf",           title: "Dune" },
-      b3: { file: "pdf-books/clean-code.pdf",     title: "Clean Code" }
+    const catalog = {
+      b1: { file: "pdf-books/atomic-habits.pdf", title: "Atomic Habits" },
+      b2: { file: "pdf-books/dune.pdf", title: "Dune" },
+      b3: { file: "pdf-books/clean-code.pdf", title: "Clean Code" },
+      b4: { file: "", title: "The Midnight Library" },
+      b5: { file: "", title: "Klara and the Sun" },
+      b6: { file: "", title: "The Psychology of Money" },
+      b7: { file: "", title: "Thinking, Fast and Slow" }
     };
 
-    const id  = new URLSearchParams(location.search).get("id");
-    const obj = map[id] || map.b1;
+    const id = new URLSearchParams(location.search).get("id");
+    const storedBooks = (() => {
+      try {
+        return JSON.parse(localStorage.getItem("readowl.libraryBooks") || "[]");
+      } catch {
+        return [];
+      }
+    })();
 
-    document.getElementById("page-title").textContent = `ReadOwl – ${obj.title}`;
-    document.getElementById("book-name").textContent    = obj.title;
-    document.getElementById("back-link").href          += id;
-    document.getElementById("pdf-viewer").src          = obj.file;
+    const storedMatch = storedBooks.find((book) => book.id === id);
+    const fallback = catalog[id] || catalog.b1;
+    const title = storedMatch?.title || fallback.title;
+    const file = storedMatch?.pdfFile || fallback.file;
+
+    document.getElementById("page-title").textContent = `ReadOwl – ${title}`;
+    document.getElementById("book-name").textContent = title;
+    document.getElementById("back-link").href += id || "b1";
+    document.getElementById("pdf-viewer").src = file || fallback.file;
   </script>
 </body>
 </html>
