@@ -1,74 +1,9 @@
 $(document).ready(function() {
   'use strict';
 
-  // Check authentication
-function checkAuth() {
   const LS = {
     CURRENT_USER: "readowl.currentUser",
-    USERS: "readowl.users"
-  };
-
-  function getLocalStorage(key, defaultValue = null) {
-    try {
-      const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : defaultValue;
-    } catch {
-      return defaultValue;
-    }
-  }
-
-  const currentUser = getLocalStorage(LS.CURRENT_USER);
-  
-  if (!currentUser) {
-    // Not logged in, redirect to login
-    if (!window.location.pathname.includes('login.html') && 
-        !window.location.pathname.includes('register.html')) {
-      window.location.href = 'login.html';
-      return false;
-    }
-  } else {
-    // Update profile with current user
-    updateUserProfile(currentUser);
-  }
-  
-  return true;
-}
-
-// Update profile with user data
-function updateUserProfile(user) {
-  // Update profile button
-  $('.profile__name').text(user.firstName);
-  $('.profile__avatar').text(user.avatar);
-  
-  // Update mini profile
-  $('.mini-profile__avatar').text(user.avatar);
-  
-  // Update profile page
-  $('.profile-header__name').text(user.firstName + ' ' + user.lastName);
-  $('.profile-header__email').text(user.email);
-  $('.profile-header__avatar').text(user.avatar);
-
-  updateHomeWelcomeMessage(user.firstName);
-}
-
-function updateHomeWelcomeMessage(firstName) {
-    // Update the welcome title
-    $('.home-hero__title').text(`Welcome back, ${firstName}!`);
-  }
-
-// Add logout function
-
-
-// Call checkAuth at the beginning
-if (!checkAuth()) {
-  return; // Stop execution if not authenticated
-}
-
-// Then continue with the rest of your existing code...
-// Add this line at the very end of the document ready function:
-
-
-  const LS = {
+    USERS: "readowl.users",
     SHELVES_MAP: "readowl.shelvesMap",
     ACTIVE_TAB: "readowl.activeTab",
     SEARCH: "readowl.search",
@@ -82,6 +17,65 @@ if (!checkAuth()) {
     RECENT_VIEWED: "readowl.recentViewed",
     LIBRARY_BOOKS: "readowl.libraryBooks"
   };
+
+  function getLocalStorage(key, defaultValue = null) {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  }
+
+  // Check authentication
+  function checkAuth() {
+    const currentUser = getLocalStorage(LS.CURRENT_USER);
+    
+    if (!currentUser) {
+      // Not logged in, redirect to login
+      if (!window.location.pathname.includes('login.html') && 
+          !window.location.pathname.includes('register.html')) {
+        window.location.href = 'login.html';
+        return false;
+      }
+    } else {
+      // Update profile with current user
+      updateUserProfile(currentUser);
+    }
+    
+    return true;
+  }
+
+  // Update profile with user data
+  function updateUserProfile(user) {
+    // Update profile button
+    $('.profile__name').text(user.firstName);
+    $('.profile__avatar').text(user.avatar);
+    
+    // Update mini profile
+    $('.mini-profile__avatar').text(user.avatar);
+    
+    // Update profile page
+    $('.profile-header__name').text(user.firstName + ' ' + user.lastName);
+    $('.profile-header__email').text(user.email);
+    $('.profile-header__avatar').text(user.avatar);
+
+    updateHomeWelcomeMessage(user.firstName);
+  }
+
+  function updateHomeWelcomeMessage(firstName) {
+    // Update the welcome title
+    $('.home-hero__title').text(`Welcome back, ${firstName}!`);
+  }
+
+  // Call checkAuth at the beginning
+  if (!checkAuth()) {
+    return; // Stop execution if not authenticated
+  }
+
+  // Then continue with the rest of your existing code...
+  // Add this line at the very end of the document ready function:
+
 
   const norm = (s) => (s || "").toLowerCase().trim();
 
@@ -102,6 +96,7 @@ if (!checkAuth()) {
   const $mShelf = $("#mShelf");
   const $mSave = $("#mSave");
   const $mRemove = $("#mRemove");
+  const $mRead = $("#mRead");
   const $mToast = $("#mToast");
   const $menuLinks = $(".menu__item");
   const $profileBtn = $(".profile");
@@ -124,15 +119,6 @@ if (!checkAuth()) {
 
   function saveShelfMap() {
     localStorage.setItem(LS.SHELVES_MAP, JSON.stringify(savedMap));
-  }
-
-  function getLocalStorage(key, defaultValue = null) {
-    try {
-      const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : defaultValue;
-    } catch {
-      return defaultValue;
-    }
   }
 
   function setLocalStorage(key, value) {
@@ -677,6 +663,24 @@ if (!checkAuth()) {
     return true;
   }
 
+  function setModalMode(mode) {
+    const $shelfRow = $mShelf.closest('.modal__row');
+    const $readRow = $mRead.closest('.modal__row');
+    const $removeRow = $mRemove.closest('.modal__row');
+
+    if (mode === 'shop') {
+      $shelfRow.hide();
+      $readRow.hide();
+      $removeRow.hide();
+      $mSave.hide();
+    } else {
+      $shelfRow.show();
+      $readRow.show();
+      $removeRow.show();
+      $mSave.show();
+    }
+  }
+
   function openModal(bookId) {
     const $book = $(`.shelves .book[data-id="${bookId}"]`);
     if (!$book.length) return;
@@ -689,6 +693,8 @@ if (!checkAuth()) {
     $mMeta.text(author ? `by ${author}` : "Move this book to another shelf");
     $mShelf.val(currentShelf);
     $mToast.hide();
+    setModalMode('library');
+    $mRead.attr('href', `reader.html?id=${encodeURIComponent(bookId)}`);
 
     // Show save button and shelf select
     $mSave.show();
@@ -726,6 +732,19 @@ if (!checkAuth()) {
         }
       }
     });
+  }
+
+  function openShopModal($shopBook) {
+    const title = $shopBook.find('.shop-book__title').text().trim() || "Book";
+    const author = $shopBook.find('.shop-book__author').text().trim() || "";
+    const description = $shopBook.data('description') || 'More details about this book are coming soon.';
+
+    $mTitle.text(title);
+    $mMeta.text(`${author}${author ? ' — ' : ''}${description}`);
+    $mToast.hide();
+    setModalMode('shop');
+
+    $modal.fadeIn(300).addClass('is-open').attr('aria-hidden', 'false');
   }
 
   function closeModal() {
@@ -933,7 +952,7 @@ if (!checkAuth()) {
         totalBooks: 15,
         readingNow: 3,
         finished: 6,
-                dayStreak: 12
+        dayStreak: 12
       });
       stats.totalBooks = (stats.totalBooks || 15) + 1;
       stats.readingNow = (stats.readingNow || 3) + 1;
@@ -949,6 +968,13 @@ if (!checkAuth()) {
         $btn.text('Add to Library').prop('disabled', false);
       }, 2000);
     }
+  });
+
+  $('.shop-book').on('click', function(e) {
+    if ($(e.target).closest('.shop-book__btn').length) {
+      return;
+    }
+    openShopModal($(this));
   });
 
   // ===================== PROFILE SETTINGS =====================
@@ -1095,85 +1121,12 @@ if (!checkAuth()) {
   
     // ===================== LOGOUT FUNCTIONALITY =====================
   
-  // Function to handle logout
-  function handleLogout() {
+  // Logout handler (single source of truth)
+  $(document).on('click', '#logoutBtn', function () {
     if (confirm('Are you sure you want to logout?')) {
-      // Clear user session
       localStorage.removeItem('readowl.currentUser');
-      
-      // Optional: Clear other user-specific data
-      // const keys = Object.keys(localStorage);
-      // keys.forEach(key => {
-      //   if (key.startsWith('readowl.user_')) {
-      //     localStorage.removeItem(key);
-      //   }
-      // });
-      
-      // Redirect to login
       window.location.href = 'login.html';
     }
-  }
-  
-  // Add logout button to profile header (if it doesn't exist)
-  function setupLogoutButton() {
-    // Check if we're on profile page
-    if ($('#view-profile').is(':visible')) {
-      // Add logout button to header
-      if ($('.profile-header__logout').length === 0) {
-        const $logoutBtn = $('<button class="profile-header__logout">Sign Out</button>');
-        $('.profile-header__edit').after($logoutBtn);
-        
-        // Style the button
-        $logoutBtn.css({
-          'margin-top': '12px',
-          'border': '1px solid rgba(239, 68, 68, 0.3)',
-          'background': 'rgba(239, 68, 68, 0.1)',
-          'color': '#ef4444',
-          'border-radius': '12px',
-          'padding': '10px 16px',
-          'font-size': '13px',
-          'font-weight': '600',
-          'cursor': 'pointer',
-          'transition': 'all .25s ease',
-          'width': '100%'
-        });
-        
-        // Add click handler
-        $logoutBtn.on('click', handleLogout);
-        
-        // Add hover effect
-        $logoutBtn.hover(
-          function() {
-            $(this).css({
-              'background': 'rgba(239, 68, 68, 0.2)',
-              'transform': 'translateY(-1px)'
-            });
-          },
-          function() {
-            $(this).css({
-              'background': 'rgba(239, 68, 68, 0.1)',
-              'transform': 'translateY(0)'
-            });
-          }
-        );
-      }
-      
-    }
-  }
-  
-  // Setup logout when profile page loads
-  $(document).on('click', '.menu__item[data-page="profile"]', function() {
-    setTimeout(setupLogoutButton, 350); // Wait for fadeIn animation
   });
-  
-  // Also setup if profile page is already active
-  if ($('#view-profile').hasClass('view--active')) {
-    setupLogoutButton();
-  }
-  $('#logoutBtn').on('click', function () {
-    localStorage.removeItem('readowl.currentUser');
-    window.location.href = 'login.html';
-  });
-  
-  // ===================== END LOGOUT FUNCTIONALITY =====================
 });
+  

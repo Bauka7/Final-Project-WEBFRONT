@@ -113,19 +113,55 @@
                 <h2 class="shelf__title">Currently reading</h2>
               </div>
               <div class="shelf__row">
-              <div class="books">
-  <a class="book" href="book.html?id=b1" data-id="b1" data-title="Atomic Habits" data-author="James Clear" title="Atomic Habits — James Clear">
-    <img class="book__img" loading="lazy" alt="Atomic Habits cover" src="books-images/atomichabits.jpg">
-  </a>
+               <div class="books">
+                  <a class="book" href="book.html?id=b1" data-id="b1" data-title="Atomic Habits" data-author="James Clear" title="Atomic Habits — James Clear">
+                    <img class="book__img" loading="lazy" alt="Atomic Habits cover" src="books-images/atomichabits.jpg">
+                  </a>
 
-  <a class="book" href="book.html?id=b2" data-id="b2" data-title="Dune" data-author="Frank Herbert" title="Dune — Frank Herbert">
-    <img class="book__img" loading="lazy" alt="Dune cover" src="books-images/dune.jpg">
-  </a>
+                  <a class="book" href="book.html?id=b2" data-id="b2" data-title="Dune" data-author="Frank Herbert" title="Dune — Frank Herbert">
+                    <img class="book__img" loading="lazy" alt="Dune cover" src="books-images/dune.jpg">
+                  </a>
 
-  <a class="book" href="book.html?id=b3" data-id="b3" data-title="Clean Code" data-author="Robert C. Martin" title="Clean Code — Robert C. Martin">
-    <img class="book__img" loading="lazy" alt="Clean Code cover" src="books-images/cleancode.jpg">
-  </a>
-</div>
+                  <a class="book" href="book.html?id=b3" data-id="b3" data-title="Clean Code" data-author="Robert C. Martin" title="Clean Code — Robert C. Martin">
+                    <img class="book__img" loading="lazy" alt="Clean Code cover" src="books-images/cleancode.jpg">
+                  </a>
+                </div>
+                <div class="board"></div>
+              </div>
+            </section>
+
+            <section class="shelf" id="shelf-next" data-shelf="next">
+              <div class="shelf__head">
+                <h2 class="shelf__title">Next up</h2>
+              </div>
+              <div class="shelf__row">
+                <div class="books">
+                  <a class="book" href="book.html?id=b4" data-id="b4" data-title="The Midnight Library" data-author="Matt Haig" title="The Midnight Library — Matt Haig">
+                    <img class="book__img" loading="lazy" alt="The Midnight Library cover" src="books-images/midnight.jpg">
+                  </a>
+
+                  <a class="book" href="book.html?id=b5" data-id="b5" data-title="Klara and the Sun" data-author="Kazuo Ishiguro" title="Klara and the Sun — Kazuo Ishiguro">
+                    <img class="book__img" loading="lazy" alt="Klara and the Sun cover" src="books-images/kazuoishi.jpg">
+                  </a>
+                </div>
+                <div class="board"></div>
+              </div>
+            </section>
+
+            <section class="shelf" id="shelf-finished" data-shelf="finished">
+              <div class="shelf__head">
+                <h2 class="shelf__title">Finished</h2>
+              </div>
+              <div class="shelf__row">
+                <div class="books">
+                  <a class="book" href="book.html?id=b6" data-id="b6" data-title="The Psychology of Money" data-author="Morgan Housel" title="The Psychology of Money — Morgan Housel">
+                    <img class="book__img" loading="lazy" alt="The Psychology of Money cover" src="books-images/psychology.jpg">
+                  </a>
+
+                  <a class="book" href="book.html?id=b7" data-id="b7" data-title="Thinking, Fast and Slow" data-author="Daniel Kahneman" title="Thinking, Fast and Slow — Daniel Kahneman">
+                    <img class="book__img" loading="lazy" alt="Thinking, Fast and Slow cover" src="books-images/thinkingfast.jpg">
+                  </a>
+                </div>
                 <div class="board"></div>
               </div>
             </section>
@@ -304,7 +340,7 @@
             </div>
 
             <div class="shop-grid">
-              <div class="shop-book" data-genre="Fiction">
+              <div class="shop-book" data-genre="Fiction" data-description="A glamorous Hollywood icon opens up about her seven husbands, revealing a story of ambition, love, and reinvention.">
                 <div class="shop-book__cover">
                   <img src="books-images/sevenhusbands.jpg" alt="The Seven Husbands of Evelyn Hugo" />
                 </div>
@@ -318,7 +354,7 @@
                   <button class="shop-book__btn">Add to Library</button>
                 </div>
               </div>
-              <div class="shop-book" data-genre="Sci-Fi">
+              <div class="shop-book" data-genre="Sci-Fi" data-description="A lone astronaut wakes up on a space mission with humanity’s fate resting on his scientific ingenuity and grit.">
                 <div class="shop-book__cover">
                   <img src="books-images/hailmary.jpg" alt="Project Hail Mary" />
                 </div>
@@ -332,7 +368,7 @@
                   <button class="shop-book__btn">Add to Library</button>
                 </div>
               </div>
-              <div class="shop-book" data-genre="Fiction">
+              <div class="shop-book" data-genre="Fiction" data-description="A woman discovers a library of alternate lives and must decide which path gives her the most meaning.">
                 <div class="shop-book__cover">
                   <img src="books-images/midnight.jpg" alt="The Midnight Library" />
                 </div>
@@ -346,7 +382,7 @@
                   <button class="shop-book__btn">Add to Library</button>
                 </div>
               </div>
-              <div class="shop-book" data-genre="Sci-Fi">
+              <div class="shop-book" data-genre="Sci-Fi" data-description="In a near-future world, an AI companion challenges what it means to be human and to love.">
                 <div class="shop-book__cover">
                   <img src="books-images/kazuoishi.jpg" alt="Klara and the Sun" />
                 </div>
@@ -360,7 +396,7 @@
                   <button class="shop-book__btn">Add to Library</button>
                 </div>
               </div>
-              <div class="shop-book" data-genre="Non-Fiction">
+              <div class="shop-book" data-genre="Non-Fiction" data-description="Timeless lessons about money, behavior, and building wealth through better decisions.">
                 <div class="shop-book__cover">
                   <img src="books-images/psychology.jpg" alt="The Psychology of Money" />
                 </div>
@@ -374,7 +410,7 @@
                   <button class="shop-book__btn">Add to Library</button>
                 </div>
               </div>
-              <div class="shop-book" data-genre="Non-Fiction">
+              <div class="shop-book" data-genre="Non-Fiction" data-description="A tour through the fast and slow systems of thinking that shape our choices every day.">
                 <div class="shop-book__cover">
                   <img src="books-images/thinkingfast.jpg" alt="Thinking, Fast and Slow" />
                 </div>
@@ -602,6 +638,9 @@
           <option value="finished">Finished</option>
         </select>
         <button class="modal__btn" id="mSave">Save</button>
+      </div>
+       <div class="modal__row" style="margin-top: 12px;">
+        <a class="modal__btn" id="mRead" href="reader.html">Start reading</a>
       </div>
       <div class="modal__row" style="margin-top: 12px;">
         <button class="modal__btn modal__btn--danger" id="mRemove" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">Remove from Library</button>
